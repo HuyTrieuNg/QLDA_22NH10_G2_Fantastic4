@@ -1,0 +1,96 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="card shadow-sm" style="width: 400px; background-color: #fff; border-radius: 8px;">
+        <div class="card-body p-4">
+            <h2 class="text-center mb-4">Đăng ký</h2>
+            
+            <form id="signup-form">
+                <div class="mb-3">
+                    <label for="fullname" class="form-label">Họ và tên</label>
+                    <input type="text" class="form-control" id="fullname" name="fullname" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" 
+                           placeholder="abc@gmail.com" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="password" class="form-label">Mật khẩu</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="confirm_password" class="form-label">Xác nhận mật khẩu</label>
+                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="role" class="form-label">Vai trò</label>
+                    <select class="form-select" id="role" name="role" required>
+                        <option value="student">Học sinh</option>
+                        <option value="teacher">Giáo viên</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <a href="/smart_learning/login" class="text-decoration-none">Đã có tài khoản? Đăng nhập</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 mb-3" style="background-color: #6B4EFF;">Đăng ký</button>
+                
+                <div class="text-center mb-3">
+                    <span class="text-muted">hoặc</span>
+                </div>
+
+                <button type="button" class="btn btn-outline-secondary w-100 mb-2 d-flex align-items-center justify-content-center gap-2">
+                    <img src="/assets/smart_learning_app/images/icons8-google.svg" alt="Google" width="20">
+                    Đăng ký với Google
+                </button>
+
+                <button type="button" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2">
+                    <img src="/assets/smart_learning_app/images/icons8-facebook.svg" alt="Facebook" width="20">
+                    Đăng ký với Facebook
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+frappe.ready(() => {
+    $('#signup-form').on('submit', function(e) {
+        e.preventDefault();
+        
+        if ($('#password').val() !== $('#confirm_password').val()) {
+            frappe.throw('Mật khẩu xác nhận không khớp');
+            return;
+        }
+
+        frappe.call({
+            method: 'smart_learning_app.api.auth.signup',
+            args: {
+                fullname: $('#fullname').val(),
+                email: $('#email').val(),
+                password: $('#password').val(),
+                role: $('#role').val()
+            },
+            callback: function(r) {
+                if (!r.exc) {
+                    frappe.show_alert({
+                        message: 'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.',
+                        indicator: 'green'
+                    });
+                    setTimeout(() => {
+                        window.location.href = '/smart_learning/login';
+                    }, 2000);
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

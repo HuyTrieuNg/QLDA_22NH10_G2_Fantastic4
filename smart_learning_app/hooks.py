@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*-
+from . import __version__ as app_version
+
 app_name = "smart_learning_app"
 app_title = "Smart Learning App"
-app_publisher = "Me"
-app_description = "abc"
-app_email = "huychieu16@gmail.com"
-app_license = "mit"
+app_publisher = "Your Name"
+app_description = "Smart Learning System"
+app_email = "your.email@example.com"
+app_license = "MIT"
 
 # Apps
 # ------------------
@@ -20,6 +23,16 @@ app_license = "mit"
 # 		"has_permission": "smart_learning_app.api.permission.has_app_permission"
 # 	}
 # ]
+
+# Website route rules
+website_route_rules = [
+    {"from_route": "/smart_learning/login", "to_route": "smart_learning/login"},
+    {"from_route": "/smart_learning/signup", "to_route": "smart_learning/signup"},
+    {"from_route": "/smart_learning/home", "to_route": "smart_learning/home"},
+    {"from_route": "/smart_learning/courses", "to_route": "smart_learning/courses"},
+    {"from_route": "/smart_learning/course/<course>", "to_route": "smart_learning/course"},
+    {"from_route": "/smart_learning/lecture/<lecture>", "to_route": "smart_learning/lecture"},
+]
 
 # Includes in <head>
 # ------------------
@@ -51,7 +64,7 @@ app_license = "mit"
 # Svg Icons
 # ------------------
 # include app icons in desk
-# app_include_icons = "smart_learning_app/public/icons.svg"
+# app_include_icons = "smart_learning_app/public/fonts/icon.svg"
 
 # Home Pages
 # ----------
@@ -61,7 +74,7 @@ app_license = "mit"
 
 # website user home page (by Role)
 # role_home_page = {
-# 	"Role": "home_page"
+#     "Role": "home_page"
 # }
 
 # Generators
@@ -78,18 +91,18 @@ app_license = "mit"
 
 # add methods and filters to jinja environment
 # jinja = {
-# 	"methods": "smart_learning_app.utils.jinja_methods",
-# 	"filters": "smart_learning_app.utils.jinja_filters"
+#     "methods": "smart_learning_app.utils.jinja_methods",
+#     "filters": "smart_learning_app.utils.jinja_filters"
 # }
 
 # Installation
-# ------------
+# --------------------
 
 # before_install = "smart_learning_app.install.before_install"
 # after_install = "smart_learning_app.install.after_install"
 
 # Uninstallation
-# ------------
+# --------------------
 
 # before_uninstall = "smart_learning_app.uninstall.before_uninstall"
 # after_uninstall = "smart_learning_app.uninstall.after_uninstall"
@@ -99,16 +112,16 @@ app_license = "mit"
 # To set up dependencies/integrations with other apps
 # Name of the app being installed is passed as an argument
 
-# before_app_install = "smart_learning_app.utils.before_app_install"
-# after_app_install = "smart_learning_app.utils.after_app_install"
+# before_app_install = "smart_learning_app.setup.before_app_install"
+# after_app_install = "smart_learning_app.setup.after_app_install"
 
 # Integration Cleanup
-# -------------------
+# ------------------
 # To clean up dependencies/integrations with other apps
 # Name of the app being uninstalled is passed as an argument
 
-# before_app_uninstall = "smart_learning_app.utils.before_app_uninstall"
-# after_app_uninstall = "smart_learning_app.utils.after_app_uninstall"
+# before_app_uninstall = "smart_learning_app.setup.before_app_uninstall"
+# after_app_uninstall = "smart_learning_app.setup.after_app_uninstall"
 
 # Desk Notifications
 # ------------------
@@ -130,15 +143,13 @@ app_license = "mit"
 
 # Document Events
 # ---------------
-# Hook on document methods and events
-
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+    # "*": {
+    #     "on_update": "method",
+    #     "on_cancel": "method",
+    #     "on_trash": "method",
+    # }
+}
 
 # Scheduled Tasks
 # ---------------
@@ -203,31 +214,35 @@ app_license = "mit"
 # --------------------
 
 # user_data_fields = [
-# 	{
-# 		"doctype": "{doctype_1}",
-# 		"filter_by": "{filter_by}",
-# 		"redact_fields": ["{field_1}", "{field_2}"],
-# 		"partial": 1,
-# 	},
-# 	{
-# 		"doctype": "{doctype_2}",
-# 		"filter_by": "{filter_by}",
-# 		"partial": 1,
-# 	},
-# 	{
-# 		"doctype": "{doctype_3}",
-# 		"strict": False,
-# 	},
-# 	{
-# 		"doctype": "{doctype_4}"
-# 	}
+#     {
+#         "doctype": "{doctype_1}",
+#         "filter_by": "{filter_by}",
+#         "redact_fields": ["{field_1}", "{field_2}"],
+#         "partial": 1,
+#     },
+#     {
+#         "doctype": "{doctype_2}",
+#         "filter_by": "{filter_by}",
+#         "partial": 1,
+#     },
+#     {
+#         "doctype": "{doctype_3}",
+#         "strict": False,
+#     },
+#     {
+#         "doctype": "{doctype_4}"
+#     }
 # ]
 
 # Authentication and authorization
 # --------------------------------
 
 # auth_hooks = [
-# 	"smart_learning_app.auth.validate"
+#     "smart_learning_app.auth.validate",
+#     "smart_learning_app.auth.before_login",
+#     "smart_learning_app.auth.after_login",
+#     "smart_learning_app.auth.before_logout",
+#     "smart_learning_app.auth.after_logout",
 # ]
 
 # Automatically update python controller files with type annotations for this app.
