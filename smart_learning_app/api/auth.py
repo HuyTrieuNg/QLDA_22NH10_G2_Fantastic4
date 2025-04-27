@@ -75,21 +75,23 @@ def signup(fullname, email, password, role="Student"):
         frappe.throw(str(e))
 
 def create_student_profile(email, fullname):
-    """Create student profile for new user"""
-    if not frappe.db.exists("Student", {"user": email}):
-        student = frappe.get_doc({
-            "doctype": "Student",
-            "student_name": fullname,
-            "user": email
-        })
-        student.insert(ignore_permissions=True)
+    """Create a student profile for the new user"""
+    # Check if student profile already exists
+    if frappe.db.exists("Course Student", {"email": email}):
+        return
+
+    # Create new student profile
+    student = frappe.get_doc({
+        "doctype": "Course Student",
+        "email": email,
+        "fullname": fullname,
+        "enabled": 1
+    })
+    student.insert(ignore_permissions=True)
+    frappe.db.commit()
 
 def create_teacher_profile(email, fullname):
     """Create teacher profile for new user"""
-    if not frappe.db.exists("Teacher", {"user": email}):
-        teacher = frappe.get_doc({
-            "doctype": "Teacher",
-            "teacher_name": fullname,
-            "user": email
-        })
-        teacher.insert(ignore_permissions=True) 
+    # Teacher is a child table, so we don't need to create it directly
+    # It will be created when a teacher is assigned to a course
+    pass 

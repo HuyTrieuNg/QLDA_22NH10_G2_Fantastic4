@@ -83,15 +83,20 @@ frappe.ready(() => {
 
         courses.forEach(course => {
             const clone = document.importNode(template.content, true);
-            
             clone.querySelector('.course-image').src = course.image || '/assets/smart_learning_app/images/default-course.jpg';
             clone.querySelector('.course-title').textContent = course.title;
-            clone.querySelector('.course-description').textContent = course.description;
+            clone.querySelector('.course-description').textContent = stripHtml(course.description);
             clone.querySelector('.teacher-name').textContent = course.teacher_name;
             clone.querySelector('.course-link').href = `/smart_learning/course/${course.name}`;
 
             container.append(clone);
         });
+    }
+
+    function stripHtml(html) {
+        let div = document.createElement("div");
+        div.innerHTML = html || "";
+        return div.textContent || div.innerText || "";
     }
 });
 </script>
