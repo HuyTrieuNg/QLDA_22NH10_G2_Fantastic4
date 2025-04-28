@@ -1,5 +1,6 @@
 import frappe
 from frappe import _
+import urllib.parse
 
 @frappe.whitelist(allow_guest=True)
 def get_featured_courses():
@@ -44,33 +45,56 @@ def get_course_details(course_name):
     """Get detailed information about a course"""
     if not course_name:
         frappe.throw(_("Course name is required"))
-        
-    course = frappe.get_doc("Course", course_name)
+
+    # Decode course_name nếu nó là dạng URL-encoded
+    course_name = urllib.parse.unquote(course_name)
+
+    # Thử lấy theo name, nếu không được thì thử lấy theo title
+    try:
+        course = frappe.get_doc("Course", course_name)
+    except frappe.DoesNotExistError:
+        # Thử tìm theo title (dành cho trường hợp truyền title trên URL)
+        course_doc = frappe.get_all(
+            "Course",
+            filters={"title": course_name},
+            fields=["name"]
+        )
+        if course_doc:
+            course = frappe.get_doc("Course", course_doc[0].name)
+        else:
+            frappe.throw(_("Course not found"))
     
     # Check if user has access
     if not course.published and not frappe.has_permission("Course", "read", course):
         frappe.throw(_("You don't have permission to access this course"))
-        
+    
     # Get instructor details
     instructor = frappe.get_doc("User", course.instructor)
     
     # Get lectures
     lectures = frappe.get_all(
         "Lecture",
-        fields=["name", "title", "description", "duration", "video_url"],
-        filters={"course": course_name},
+        fields=["name", "title"],
+        filters={"course": course.name},
         order_by="creation"
     )
     
     # Get total enrolled students
-    enrolled_students = frappe.db.count("Course Student", {"course": course_name})
+    enrolled_students = frappe.db.count("Course Student", {"course": course.name})
     
     return {
-        "course": course,
+        "course": {
+            "name": course.name,
+            "title": course.title,
+            "description": course.description,
+            "image": frappe.utils.get_url(course.image) if course.image else "",
+            "overview": getattr(course, "overview", ""),
+        },
         "instructor": {
             "name": instructor.name,
             "full_name": instructor.full_name,
-            "bio": instructor.bio if hasattr(instructor, 'bio') else ""
+            "bio": getattr(instructor, "bio", ""),
+            "avatar": frappe.utils.get_url(instructor.user_image) if instructor.user_image else ""
         },
         "lectures": lectures,
         "enrolled_students": enrolled_students

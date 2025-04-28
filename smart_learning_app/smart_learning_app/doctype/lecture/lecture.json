@@ -30,7 +30,7 @@
   {
    "fieldname": "discription",
    "fieldtype": "Data",
-   "label": "Discription"
+   "label": "Description"
   },
   {
    "fieldname": "lecture_type",
@@ -42,7 +42,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-19 14:45:13.010666",
+ "modified": "2025-04-28 09:42:45.066221",
  "modified_by": "Administrator",
  "module": "Smart Learning App",
  "name": "Lecture",

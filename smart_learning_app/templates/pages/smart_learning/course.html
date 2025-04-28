@@ -6,10 +6,13 @@
         <!-- Course Content Sidebar -->
         <div class="col-md-3">
             <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header rounded-top text-white">
                     <h5 class="mb-0">Nội dung khóa học</h5>
                 </div>
                 <div class="card-body p-0">
+                    <div class="sidebar-image-wrapper">
+                        <img src="" alt="Course Image" class="sidebar-course-image w-100">
+                    </div>
                     <div class="accordion" id="courseChapters">
                         <!-- Chapters will be dynamically loaded here -->
                     </div>
@@ -21,9 +24,10 @@
         <div class="col-md-9">
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
+                    <!-- <img src="" alt="Course Image" class="course-image mb-3" style="width: 100%; max-height: 250px; object-fit: cover;"> -->
                     <h1 class="course-title mb-3"></h1>
                     <div class="d-flex align-items-center mb-4">
-                        <img src="" alt="Teacher Avatar" class="teacher-avatar rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                        <!-- <img src="" alt="Teacher Avatar" class="teacher-avatar rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;"> -->
                         <div>
                             <p class="mb-0 teacher-name"></p>
                             <small class="text-muted">Giảng viên</small>
@@ -111,28 +115,48 @@
 
 <script>
 frappe.ready(() => {
-    const courseId = frappe.utils.get_url_arg('name');
-    
-    // Load course details
+    let courseId = frappe.utils.get_url_arg('name');
+    if (!courseId) {
+        const pathParts = window.location.pathname.split('/').filter(Boolean);
+        courseId = pathParts[pathParts.length - 1];
+        if (courseId === 'course') {
+            courseId = null;
+        }
+    }
+    console.log('courseId:', courseId);
+
+    if (!courseId) {
+        alert('Không tìm thấy mã khóa học trong URL!');
+        return;
+    }
     frappe.call({
         method: 'smart_learning_app.api.course.get_course_details',
-        args: { course: courseId },
+        args: { course_name: courseId },
         callback: function(r) {
             if (!r.exc) {
                 const course = r.message;
+                console.log('Course data:', course);
+                console.log('Course image URL:', course.course.image);
+                console.log('Instructor avatar URL:', course.instructor.avatar);
                 renderCourseDetails(course);
                 renderChapters(course.chapters);
                 updateProgress(course.progress);
+            } else {
+                console.error('Error fetching course details:', r.exc);
             }
         }
     });
 
     function renderCourseDetails(course) {
-        $('.course-title').text(course.title);
-        $('.course-description').text(course.description);
-        $('.teacher-avatar').attr('src', course.teacher_image);
-        $('.teacher-name').text(course.teacher_name);
-        $('.course-overview').html(course.overview);
+        $('.course-title').text(course.course.title);
+        // Remove HTML tags from description and set as text
+        const description = $(course.course.description).text();
+        $('.course-description').text(description);
+        $('.teacher-avatar').attr('src', course.instructor.avatar);
+        $('.teacher-name').text(course.instructor.full_name);
+        $('.course-overview').html(course.course.overview);
+        $('.course-image').attr('src', course.course.image);
+        $('.sidebar-course-image').attr('src', course.course.image);
     }
 
     function renderChapters(chapters) {
@@ -186,6 +210,36 @@ frappe.ready(() => {
 }
 .lecture-link:hover {
     color: #0d6efd !important;
+}
+.card {
+  border-radius: 0.75rem; 
+  overflow: hidden;      
+}
+.card-header {
+  border-bottom: none;             
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+  color: #fff;
+}
+
+.sidebar-image-wrapper {
+  height: 180px;
+  overflow: hidden;
+  border-bottom-left-radius: 0;    
+  border-bottom-right-radius: 0;
+  margin: 0;                       
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.sidebar-course-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.card-body.p-0 {
+  padding: 0 !important; 
 }
 </style>
 {% endblock %} 

@@ -1,32 +1,54 @@
 {% extends "templates/web.html" %}
 
 {% block page_content %}
-<div class="container py-5">
+<div class="container py-4">
+    <!-- Header Section -->
     <div class="row mb-4">
         <div class="col">
-            <h1 class="mb-3">Khóa học</h1>
-            <p class="lead">Khám phá các khóa học chất lượng từ những giảng viên hàng đầu</p>
+            <h1 class="display-6 mb-7">Khóa học</h1>
+            <p class="lead text-muted mb-0">Khám phá các khóa học chất lượng từ những giảng viên hàng đầu</p>
         </div>
     </div>
 
     <!-- Filters -->
     <div class="row mb-4">
         <div class="col">
-            <div class="d-flex gap-2">
-                <input type="text" class="form-control" id="search" placeholder="Tìm kiếm khóa học...">
-                <select class="form-select" style="width: auto;">
-                    <option value="">Tất cả danh mục</option>
-                    <option value="programming">Lập trình</option>
-                    <option value="design">Thiết kế</option>
-                    <option value="business">Kinh doanh</option>
-                </select>
-                <select class="form-select" style="width: auto;">
-                    <option value="">Sắp xếp theo</option>
-                    <option value="newest">Mới nhất</option>
-                    <option value="popular">Phổ biến nhất</option>
-                    <option value="price-asc">Giá tăng dần</option>
-                    <option value="price-desc">Giá giảm dần</option>
-                </select>
+            <div class="card shadow-sm">
+                <div class="card-body p-3">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <!-- <span class="input-group-text bg-white border-end-0">
+                                    <i class="bi bi-search"></i>
+                                </span> -->
+                                <input type="text" class="form-control border-start-0" id="search" placeholder="Tìm kiếm khóa học...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="dropdown-wrapper">
+                                <select class="form-select custom-select">
+                                    <option value="">Tất cả danh mục</option>
+                                    <option value="programming">Lập trình</option>
+                                    <option value="design">Thiết kế</option>
+                                    <option value="business">Kinh doanh</option>
+                                </select>
+                                <i class="bi bi-chevron-down dropdown-icon"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="dropdown-wrapper">
+                                <select class="form-select custom-select">
+                                    <option value="">Sắp xếp theo</option>
+                                    <option value="newest">Mới nhất</option>
+                                    <option value="popular">Phổ biến nhất</option>
+                                    <option value="price-asc">Giá tăng dần</option>
+                                    <option value="price-desc">Giá giảm dần</option>
+                                </select>
+                                <i class="bi bi-chevron-down dropdown-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -73,7 +95,7 @@
     </div>
 
     <!-- Pagination -->
-    <div class="row mt-4">
+    <div class="row mt-5">
         <div class="col">
             <nav aria-label="Page navigation">
                 <ul class="pagination justify-content-center">
@@ -118,6 +140,53 @@ frappe.ready(() => {
 }
 .card:hover {
     transform: translateY(-5px);
+}
+.input-group-text {
+    color: #6c757d;
+}
+.form-control:focus, .form-select:focus {
+    box-shadow: none;
+    border-color: #dee2e6;
+}
+
+/* Dropdown Styles */
+.dropdown-wrapper {
+    position: relative;
+}
+.custom-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 2.5rem;
+    cursor: pointer;
+    background-color: white;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    transition: border-color 0.15s ease-in-out;
+    height: 38px;
+}
+.custom-select:hover {
+    border-color: #adb5bd;
+}
+.dropdown-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #6c757d;
+    transition: color 0.15s ease-in-out;
+}
+.custom-select:focus + .dropdown-icon {
+    color: #0d6efd;
+}
+
+/* Input group styles */
+.input-group {
+    height: 38px;
+}
+.input-group-text, .form-control {
+    height: 100%;
 }
 </style>
 {% endblock %} 
