@@ -3,53 +3,113 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.pyc
+*.pyo
+*.pyd
 *.py~
 
-# Distribution / packaging
-.Python
-develop-eggs/
+# Django
+*.log
+*.pot
+*.pyc
+*.pyo
+*.db
+*.sqlite3
+*.sqlite3-journal
+local_settings.py
+.env
+.venv
+venv/
+env/
+ENV/
+.env.*
+
+# Django Migrations
+**/migrations/*.pyc
+**/migrations/*.pyo
+**/migrations/*.py~
+**/migrations/__pycache__/
+
+# Node/React
+node_modules/
 dist/
+build/
+*.local
+*.env.local
+*.env.development.local
+*.env.test.local
+*.env.production.local
+
+# Vite
+/dist
+/dist-ssr
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# IDEs and editors
+.vscode/
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+
+# Misc
+*.egg-info/
+.eggs/
 downloads/
-eggs/
 .eggs/
 lib64/
 parts/
 sdist/
 var/
 wheels/
-*.egg-info/
-.installed.cfg
 *.egg
-tags
+.installed.cfg
 MANIFEST
 
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
 # Dependency directories
-node_modules/
 jspm_packages/
-
-# IDEs and editors
-.vscode/
-.vs/
-.idea/
-.kdev4/
-*.kdev4
-*.DS_Store
-*.swp
-*.comp.js
-.wnf-lang-status
-*debug.log
 
 # Helix Editor
 .helix/
 
 # Aider AI Chat
 .aider*
+
+# Coverage
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# OS files
+Thumbs.db
+Desktop.ini
+
+# Frontend static build
+frontend/build/
+frontend/dist/
+
+# Backend staticfiles
+staticfiles/
+static/
+media/
+
+# VSCode Workspace Storage
+.vscode/*
+!.vscode/extensions.json
