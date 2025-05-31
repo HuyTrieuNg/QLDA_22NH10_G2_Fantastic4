@@ -12,7 +12,7 @@
 
 ```bash
 git clone https://github.com/HuyTrieuNg/QLDA_22NH10_G2_Fantastic4.git
-cd QLDA
+cd /path-to-your-project
 ```
 
 ## 2. Thiết lập môi trường backend (Django)
