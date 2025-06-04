@@ -1,5 +1,7 @@
 project.txt
 
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -24,6 +26,7 @@ venv/
 env/
 ENV/
 .env.*
+!.env.example
 
 # Django Migrations
 **/migrations/*.pyc

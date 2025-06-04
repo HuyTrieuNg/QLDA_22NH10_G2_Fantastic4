@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'api',
     'user',
+    'course',
 ]
 
 MIDDLEWARE = [
@@ -165,3 +166,6 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # Media files for user uploads
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Google AI API Key for quiz generation
+GOOGLE_AI_API_KEY = os.environ.get('GOOGLE_AI_API_KEY', '')

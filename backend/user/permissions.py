@@ -5,36 +5,46 @@ class IsTeacherOrAdmin(BasePermission):
     Custom permission to allow only teachers and admins to access.
     """
     def has_permission(self, request, view):
-        return bool(
-            request.user and request.user.is_authenticated and
-            (
-                request.user.is_staff or 
-                request.user.profile.user_type == 'teacher' or
-                request.user.profile.user_type == 'admin'
-            )
-        )
+        if not (request.user and request.user.is_authenticated):
+            return False
+        
+        # Check if user is staff (admin)
+        if request.user.is_staff:
+            return True
+            
+        # Check if user has profile and is teacher or admin
+        try:
+            return hasattr(request.user, 'profile') and request.user.profile.user_type in ['teacher', 'admin']
+        except AttributeError:
+            return False
 
 class IsTeacher(BasePermission):
     """
     Custom permission to allow only teachers to access.
     """
     def has_permission(self, request, view):
-        return bool(
-            request.user and 
-            request.user.is_authenticated and
-            request.user.profile.user_type == 'teacher'
-        )
+        if not (request.user and request.user.is_authenticated):
+            return False
+            
+        # Check if user has profile and is teacher
+        try:
+            return hasattr(request.user, 'profile') and request.user.profile.user_type == 'teacher'
+        except AttributeError:
+            return False
 
 class IsStudent(BasePermission):
     """
     Custom permission to allow only students to access.
     """
     def has_permission(self, request, view):
-        return bool(
-            request.user and 
-            request.user.is_authenticated and
-            request.user.profile.user_type == 'student'
-        )
+        if not (request.user and request.user.is_authenticated):
+            return False
+            
+        # Check if user has profile and is student
+        try:
+            return hasattr(request.user, 'profile') and request.user.profile.user_type == 'student'
+        except AttributeError:
+            return False
 
 class IsOwnerOrAdminOrTeacher(BasePermission):
     """
