@@ -76,12 +76,15 @@ export const quizService = {
   
   // Create quiz
   createQuiz: (sectionId, data) => api.post(`/sections/${sectionId}/quizzes/`, data),
-  
-  // Update quiz
+    // Update quiz
   updateQuiz: (id, data) => api.patch(`/quizzes/${id}/`, data),
-  
-  // Delete quiz
+    // Delete quiz
   deleteQuiz: (id) => api.delete(`/quizzes/${id}/`),
+  
+  // Generate quiz automatically using AI
+  generateAutoQuiz: (sectionId, data) => api.post(`/sections/${sectionId}/generate-quiz/`, data, {
+    timeout: 300000, // 5 phút timeout cho AI quiz generation
+  }),
 };
 
 export default api;

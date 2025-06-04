@@ -31,10 +31,12 @@ urlpatterns = [
     # Question URLs
     path('quizzes/<int:quiz_id>/questions/', views.QuestionListCreateView.as_view(), name='question-list-create'),
     path('questions/<int:pk>/', views.QuestionDetailView.as_view(), name='question-detail'),
-    
-    # Choice URLs
+      # Choice URLs
     path('questions/<int:question_id>/choices/', views.ChoiceListCreateView.as_view(), name='choice-list-create'),
     path('choices/<int:pk>/', views.ChoiceDetailView.as_view(), name='choice-detail'),
+    
+    # Auto Quiz Generation URLs
+    path('sections/<int:section_id>/generate-quiz/', views.generate_auto_quiz, name='generate-auto-quiz'),
     
     # Dashboard URLs
     path('dashboard/teacher/', views.TeacherDashboardView.as_view(), name='teacher-dashboard'),

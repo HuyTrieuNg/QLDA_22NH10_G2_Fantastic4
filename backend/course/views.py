@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.models import User
 from django.db.models import Q, Count
 from django.db import models
+import logging
 
 # Import custom permissions
 from user.permissions import IsTeacherOrAdmin, IsTeacher, IsStudent, IsOwnerOrAdminOrTeacher
@@ -19,6 +20,11 @@ from .serializers import (
     UserCourseSerializer, SectionCreateUpdateSerializer, LessonCreateUpdateSerializer,
     QuizCreateUpdateSerializer, QuestionCreateUpdateSerializer, ChoiceCreateUpdateSerializer
 )
+
+# Import utils for AI quiz generation
+from .utils import generate_quiz_from_lessons, generate_quiz_from_selected_lessons
+
+logger = logging.getLogger(__name__)
 
 
 # Course Views
@@ -525,3 +531,77 @@ class AdminDashboardView(APIView):
             'total_teachers': total_teachers,
             'total_students': total_students
         })
+
+
+# Auto Quiz Generation Views
+@api_view(['POST'])
+@permission_classes([IsTeacherOrAdmin])
+def generate_auto_quiz(request, section_id):
+    """
+    Generate quiz questions automatically from section lessons using AI
+    """
+    try:
+        section = get_object_or_404(Section, id=section_id)
+        
+        # Kiểm tra quyền: chỉ creator, teacher hoặc admin mới được tạo
+        if not (section.course.creator == request.user or 
+                request.user.is_staff or
+                (hasattr(request.user, 'profile') and 
+                 request.user.profile.user_type in ['teacher', 'admin'])):
+            return Response(
+                {"error": "Bạn không có quyền tạo quiz cho chương này"}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Get parameters from request
+        num_questions = request.data.get('num_questions', 10)
+        selected_lesson_ids = request.data.get('lesson_ids', [])
+        
+        # Validate num_questions
+        if not isinstance(num_questions, int) or num_questions < 1 or num_questions > 30:
+            return Response(
+                {"error": "Số câu hỏi phải từ 1 đến 30"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check if section has lessons
+        if not section.lessons.exists():
+            return Response(
+                {"error": "Chương này chưa có bài học nào để tạo quiz"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Generate questions using AI
+        if selected_lesson_ids:
+            # Validate selected lessons belong to this section
+            valid_lesson_ids = list(section.lessons.filter(id__in=selected_lesson_ids).values_list('id', flat=True))
+            if not valid_lesson_ids:
+                return Response(
+                    {"error": "Không tìm thấy bài học hợp lệ để tạo quiz"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            questions = generate_quiz_from_selected_lessons(valid_lesson_ids, num_questions)
+        else:
+            # Use all lessons in section
+            questions = generate_quiz_from_lessons(section, num_questions)
+        
+        if not questions:
+            return Response(
+                {"error": "Không thể tạo câu hỏi từ nội dung bài học. Vui lòng kiểm tra lại nội dung hoặc thử lại sau."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Return generated questions for preview
+        return Response({
+            "message": "Tạo câu hỏi thành công",
+            "section_title": section.title,
+            "num_questions": len(questions),
+            "questions": questions
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        logger.error(f"Error in generate_auto_quiz: {str(e)}")
+        return Response(
+            {"error": "Đã xảy ra lỗi khi tạo quiz. Vui lòng thử lại sau."}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

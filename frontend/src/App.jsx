@@ -25,6 +25,7 @@ import CourseStudents from "./components/teacher/CourseStudents";
 import CreateEditSection from "./components/teacher/CreateEditSection";
 import CreateEditLesson from "./components/teacher/CreateEditLesson";
 import CreateEditQuiz from "./components/teacher/CreateEditQuiz";
+import AutoQuizGeneration from "./components/teacher/AutoQuizGeneration";
 
 import "./index.css";
 
@@ -56,9 +57,9 @@ function App() {
               {/* Section Content Routes */}
             <Route path="/teacher/courses/:id/sections/create" element={<CreateEditSection isEdit={false} />} />
             <Route path="/teacher/sections/:sectionId/edit" element={<CreateEditSection isEdit={true} />} />            <Route path="/teacher/sections/:sectionId/lessons/create" element={<CreateEditLesson isEdit={false} />} />
-            <Route path="/teacher/sections/:sectionId/lessons/:lessonId/edit" element={<CreateEditLesson isEdit={true} />} />
-            <Route path="/teacher/sections/:sectionId/quizzes/create" element={<CreateEditQuiz isEdit={false} />} />
+            <Route path="/teacher/sections/:sectionId/lessons/:lessonId/edit" element={<CreateEditLesson isEdit={true} />} />            <Route path="/teacher/sections/:sectionId/quizzes/create" element={<CreateEditQuiz isEdit={false} />} />
             <Route path="/teacher/sections/:sectionId/quizzes/:quizId/edit" element={<CreateEditQuiz isEdit={true} />} />
+            <Route path="/teacher/sections/:sectionId/generate-quiz" element={<AutoQuizGeneration />} />
           </Route>
 
           {/* Redirect to home for undefined routes */}

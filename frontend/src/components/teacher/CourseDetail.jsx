@@ -13,7 +13,8 @@ import {
   Trash2,
   Eye,
   Settings,
-  HelpCircle
+  HelpCircle,
+  Bot
 } from 'lucide-react';
 import { courseService, sectionService, lessonService, quizService } from '../../services/courseService';
 import toast from 'react-hot-toast';
@@ -273,8 +274,7 @@ const CourseDetail = () => {
               </div>
             )) || null}
 
-            {/* Add Content Buttons */}
-            <div className="flex gap-2 pt-2">
+            {/* Add Content Buttons */}            <div className="flex gap-2 pt-2">
               <Link
                 to={`/teacher/sections/${section.id}/lessons/create`}
                 className="text-sm text-purple-600 hover:text-purple-700 flex items-center"
@@ -289,6 +289,14 @@ const CourseDetail = () => {
               >
                 <Plus className="w-3 h-3 mr-1" />
                 Thêm bài kiểm tra
+              </Link>
+              <span className="text-gray-300">•</span>
+              <Link
+                to={`/teacher/sections/${section.id}/generate-quiz`}
+                className="text-sm text-green-600 hover:text-green-700 flex items-center"
+              >
+                <Bot className="w-3 h-3 mr-1" />
+                Tạo câu hỏi AI
               </Link>
             </div>
           </div>
