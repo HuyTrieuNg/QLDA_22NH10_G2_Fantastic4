@@ -5,13 +5,16 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db.models import Q
 from user.permissions import IsStudent
-from course.models import Course, Section, Lesson, UserCourse
+from course.models import Course, Section, Lesson, UserCourse, QuizAttempt, Quiz, Question, Choice
 from .serializers import (
     StudentCourseListSerializer, 
     StudentCourseDetailSerializer, 
     StudentLessonSerializer,
     EnrolledCourseSerializer
 )
+from course.serializers import QuizAttemptSerializer
+from course.utils import extract_lesson_content, get_youtube_transcript, summarize_content_with_ai, generate_quiz_feedback_with_ai
+import json
 
 
 class StudentCourseListView(generics.ListAPIView):
@@ -137,3 +140,211 @@ class StudentLessonDetailView(generics.RetrieveAPIView):
                 user_course.save()
         
         return Response(serializer.data)
+
+
+class StudentQuizHistoryListView(generics.ListAPIView):
+    """
+    Danh sách tất cả lịch sử làm bài quiz của học viên hiện tại
+    """
+    serializer_class = QuizAttemptSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return QuizAttempt.objects.filter(user=self.request.user)
+
+class StudentQuizHistoryByQuizView(APIView):
+    """
+    Lấy lịch sử làm bài mới nhất cho một quiz cụ thể của học viên hiện tại, trả về chi tiết giống submit
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, quiz_id):
+        attempt = QuizAttempt.objects.filter(user=request.user, quiz_id=quiz_id).order_by('-submitted_at').first()
+        if not attempt:
+            return Response(None)
+        # Lấy quiz và questions
+        quiz = attempt.quiz
+        questions = quiz.questions.all()
+        answers = attempt.answers or {}
+        answer_detail = []
+        correct = 0
+        total = questions.count()
+        for q in questions:
+            qid = str(q.id)
+            selected = answers.get(qid)
+            correct_choice = q.choices.filter(is_correct=True).first()
+            is_correct = str(getattr(correct_choice, 'id', None)) == str(selected)
+            if is_correct:
+                correct += 1
+            answer_detail.append({
+                "question": q.text,
+                "your_choice": selected,
+                "correct_choice": str(getattr(correct_choice, 'id', None)),
+            })
+        return Response({
+            "score": attempt.score,
+            "correct": correct,
+            "total": total,
+            "answers": answer_detail,
+            "attempt_id": attempt.id,
+            "submitted_at": attempt.submitted_at
+        })
+
+
+class StudentQuizSubmitView(APIView):
+    """
+    Học sinh nộp bài kiểm tra, chấm điểm và lưu lịch sử làm bài
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, quiz_id):
+        quiz = get_object_or_404(Quiz, id=quiz_id)
+        answers = request.data.get("answers", {})  # {question_id: choice_id}
+        if not isinstance(answers, dict):
+            return Response({"detail": "answers phải là dict {question_id: choice_id}"}, status=400)
+
+        questions = quiz.questions.all()
+        total = questions.count()
+        correct = 0
+        answer_detail = []
+        for q in questions:
+            qid = str(q.id)
+            selected = answers.get(qid)
+            correct_choice = q.choices.filter(is_correct=True).first()
+            is_correct = str(getattr(correct_choice, 'id', None)) == str(selected)
+            if is_correct:
+                correct += 1
+            answer_detail.append({
+                "question": q.text,
+                "your_choice": selected,
+                "correct_choice": str(getattr(correct_choice, 'id', None)),
+            })
+        score = round((correct / total) * 10, 2) if total > 0 else 0
+        # Lưu QuizAttempt
+        attempt = QuizAttempt.objects.create(
+            user=request.user,
+            quiz=quiz,
+            score=score,
+            correct_count=correct,
+            total_count=total,
+            answers=answers
+        )
+
+        # --- Update progress after quiz submission ---
+        course = quiz.section.course
+        user_course = UserCourse.objects.get(user=request.user, course=course)
+        # Count total lessons and quizzes
+        total_lessons = 0
+        total_quizzes = 0
+        for section in course.sections.all():
+            total_lessons += section.lessons.count()
+            total_quizzes += section.quizzes.count()
+        total_items = total_lessons + total_quizzes
+        # Count completed lessons and quizzes (simple: +1 for this quiz if not already counted)
+        # For real tracking, should have a table for completed lessons/quizzes per user
+        # Here, just increment progress if not 100%
+        if total_items > 0 and user_course.progress < 100:
+            progress_increment = 100 / total_items
+            user_course.progress = min(user_course.progress + progress_increment, 100)
+            user_course.save()
+        # --- End update progress ---
+
+        return Response({
+            "score": score,
+            "correct": correct,
+            "total": total,
+            "answers": answer_detail,
+            "attempt_id": attempt.id
+        })
+
+
+class StudentLessonSummarizeView(APIView):
+    """
+    API: POST /student/lessons/<lesson_id>/summarize/
+    Tóm tắt nội dung bài học (text + phụ đề video nếu có)
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, lesson_id):
+        from course.models import Lesson
+        lesson = get_object_or_404(Lesson, id=lesson_id)
+        # Check permission: must be enrolled
+        course = lesson.section.course
+        if not UserCourse.objects.filter(user=request.user, course=course).exists():
+            return Response({"detail": "Bạn chưa đăng ký khóa học này"}, status=403)
+        # Gather content
+        content = lesson.content or ""
+        transcript = get_youtube_transcript(lesson.video_url) if lesson.video_url else ""
+        content_ok = content and len(content.strip()) > 100
+        transcript_ok = transcript and len(transcript.strip()) > 100
+        if not content_ok and not transcript_ok:
+            return Response({"detail": "Nội dung bài học và phụ đề video không đủ để tóm tắt (cần > 100 ký tự)."}, status=400)
+        # Ưu tiên content, nếu có transcript thì nối vào
+        full_content = ""
+        if content_ok:
+            full_content += content.strip()
+        if transcript_ok:
+            if full_content:
+                full_content += "\n\n--- Phụ đề video ---\n\n"
+            full_content += transcript.strip()
+        # Gọi AI
+        summary = summarize_content_with_ai(full_content)
+        if not summary:
+            return Response({"detail": "Không thể tóm tắt nội dung. Vui lòng thử lại sau."}, status=500)
+        return Response({"summary": summary})
+
+class StudentQuizAIFeedbackView(APIView):
+    """
+    Nhận xét AI cho kết quả làm bài quiz của học sinh
+    POST /student/quiz-attempts/<int:quiz_attempt_id>/ai-feedback/
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, quiz_attempt_id):
+        # Lấy QuizAttempt theo id
+        attempt = get_object_or_404(QuizAttempt, id=quiz_attempt_id, user=request.user)
+        # Lấy dữ liệu kết quả quiz
+        quiz = attempt.quiz
+        questions = quiz.questions.all()
+        answers = attempt.answers or {}
+        answer_detail = []
+        correct = 0
+        total = questions.count()
+        for q in questions:
+            qid = str(q.id)
+            selected = answers.get(qid)
+            correct_choice = q.choices.filter(is_correct=True).first()
+            is_correct = str(getattr(correct_choice, 'id', None)) == str(selected)
+            if is_correct:
+                correct += 1
+            answer_detail.append({
+                "question": q.text,
+                "your_choice": selected,
+                "correct_choice": str(getattr(correct_choice, 'id', None)),
+            })
+        quiz_result = {
+            "score": attempt.score,
+            "correct": correct,
+            "total": total,
+            "answers": answer_detail,
+            "attempt_id": attempt.id,
+            "submitted_at": str(attempt.submitted_at)
+        }
+        # Prompt mẫu
+        prompt = (
+            "Bạn là một trợ lý học tập. Hãy đánh giá kết quả bài kiểm tra trắc nghiệm của học sinh và đưa ra phản hồi chi tiết.\n\n"
+            "Yêu cầu:\n"
+            "1. Đưa ra **điểm mạnh** của học sinh: nêu rõ các phần kiến thức hoặc dạng câu hỏi học sinh làm tốt.\n"
+            "2. Chỉ ra **kiến thức hoặc kỹ năng học sinh cần cải thiện**: liệt kê các chủ đề hoặc dạng câu hỏi mà học sinh làm sai hoặc còn yếu.\n"
+            "3. Gợi ý **hướng học tập tiếp theo** để cải thiện kết quả trong tương lai (ngắn gọn).\n\n"
+            "**Yêu cầu định dạng:**\n"
+            "- Trả về kết quả ở dạng markdown, sử dụng tiêu đề, danh sách, in đậm, in nghiêng, bảng nếu cần.\n"
+            "- Không giải thích thêm, chỉ trả về markdown, 3 yêu cầu in đậm, từ khóa in nghiêng, có đánh số.\n\n"
+            "Thông tin đầu vào: kết quả bài kiểm tra sau:\n"
+            f"{json.dumps(quiz_result, ensure_ascii=False, indent=2)}"
+        )
+        # Gọi AI
+        feedback = generate_quiz_feedback_with_ai(prompt)
+        if not feedback:
+            return Response({"detail": "Không thể tạo nhận xét AI. Vui lòng thử lại sau."}, status=500)
+        return Response({"feedback": feedback})

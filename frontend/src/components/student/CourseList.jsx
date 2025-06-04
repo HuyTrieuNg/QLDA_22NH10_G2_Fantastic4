@@ -3,13 +3,14 @@ import { Link } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { Search, BookOpen, Users } from "lucide-react";
 import { studentService } from "../../services/studentService";
+import { categories } from "../../constants/categories";
 
 const CourseList = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [categories, setCategories] = useState([]);
+  const [activeCategory, setActiveCategory] = useState("");
 
   useEffect(() => {
     fetchCourses();
@@ -24,14 +25,6 @@ const CourseList = () => {
       }
       const response = await studentService.getAllCourses(params);
       setCourses(response.data);
-
-      // Extract unique categories
-      const uniqueCategories = [
-        ...new Set(
-          response.data.map((course) => course.category).filter(Boolean)
-        ),
-      ];
-      setCategories(uniqueCategories);
     } catch (error) {
       toast.error("Không thể tải danh sách khóa học");
       console.error("Error fetching courses:", error);
@@ -60,6 +53,17 @@ const CourseList = () => {
 
   const handleCategoryChange = (e) => {
     setSelectedCategory(e.target.value);
+    setActiveCategory(e.target.value);
+  };
+
+  const handleCategoryButton = (cat) => {
+    if (activeCategory === cat) {
+      setSelectedCategory("");
+      setActiveCategory("");
+    } else {
+      setSelectedCategory(cat);
+      setActiveCategory(cat);
+    }
   };
 
   return (
@@ -86,16 +90,16 @@ const CourseList = () => {
               <Search size={20} />
             </button>
           </form>
-
+          {/* Danh mục dạng select thay cho list */}
           <select
-            value={selectedCategory}
-            onChange={handleCategoryChange}
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+            value={activeCategory}
+            onChange={(e) => handleCategoryButton(e.target.value)}
+            className="w-48 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
           >
-            <option value="">Tất cả danh mục</option>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
+            <option value="">Tất cả</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
               </option>
             ))}
           </select>
@@ -137,9 +141,13 @@ const CourseList = () => {
               <div className="aspect-video w-full overflow-hidden bg-gray-200 dark:bg-slate-700">
                 {course.thumbnail ? (
                   <img
-                    src={`http://localhost:8000${course.thumbnail}`}
+                    src={
+                      course.thumbnail.startsWith("http")
+                        ? course.thumbnail
+                        : `http://localhost:8000${course.thumbnail}`
+                    }
                     alt={course.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-slate-700">
@@ -174,7 +182,7 @@ const CourseList = () => {
                     <span>{course.lesson_count} bài học</span>
                   </div>
                   <span className="font-semibold text-indigo-600 dark:text-indigo-400">
-                    {course.price ? `${course.price}$` : "Miễn phí"}
+                    {course.price ? `$${course.price}` : "Miễn phí"}
                   </span>
                 </div>
               </div>

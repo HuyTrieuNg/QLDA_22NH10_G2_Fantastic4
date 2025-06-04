@@ -14,6 +14,7 @@ import {
   BookOpen
 } from 'lucide-react';
 import { courseService } from '../../services/courseService';
+import { categories } from '../../constants/categories';
 import TeacherLayout from '../common/TeacherLayout';
 import toast from 'react-hot-toast';
 
@@ -236,7 +237,7 @@ const TeacherCourses = () => {
                 <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                   <div className="flex items-center">
                     <Users className="w-4 h-4 mr-1" />
-                    <span>{course.students?.length || 0} học viên</span>
+                    <span>{course.student_count || 0} học viên</span>
                   </div>
                   <div className="flex items-center">
                     <Calendar className="w-4 h-4 mr-1" />

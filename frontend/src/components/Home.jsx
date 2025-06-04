@@ -50,6 +50,7 @@ import FeaturedCourseCard from "./FeaturedCourseCard";
 import FeaturedCourseSkeleton from "./FeaturedCourseSkeleton";
 import CategoryCard from "./CategoryCard";
 import Footer from "./Footer";
+import { categories as sharedCategories } from "../constants/categories";
 
 // Function to get an icon based on category name
 const getIconForCategory = (category) => {
@@ -94,10 +95,10 @@ const Home = () => {
   const [userData, setUserData] = useState({});
   const [featuredCourses, setFeaturedCourses] = useState([]);
   const [popularCourses, setPopularCourses] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
   // Check if user is logged in
@@ -117,7 +118,6 @@ const Home = () => {
     // Load featured courses
     fetchCourses();
   }, []);
-
   const fetchCourses = useCallback(async () => {
     try {
       setLoading(true);
@@ -134,27 +134,12 @@ const Home = () => {
           .filter((course) => !featured.some((fc) => fc.id === course.id))
           .slice(0, 3);
         setPopularCourses(popular);
-
-        // Extract unique categories
-        const uniqueCategories = [
-          ...new Set(
-            response.data.map((course) => course.category).filter(Boolean)
-          ),
-        ];
-        setCategories(uniqueCategories.slice(0, 8)); // Maximum 8 categories
       }
     } catch (error) {
       console.error("Failed to load courses:", error);
       // Fallback to empty arrays if API fails
       setFeaturedCourses([]);
       setPopularCourses([]);
-      setCategories([
-        "Lập trình",
-        "Ngoại ngữ",
-        "Marketing",
-        "Thiết kế",
-        "Kinh doanh",
-      ]);
     } finally {
       setLoading(false);
     }
@@ -165,10 +150,26 @@ const Home = () => {
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("userData");
     setIsLoggedIn(false);
-    setProfileOpen(false);
+    setProfileDropdownOpen(false);
     toast.success("Đã đăng xuất thành công");
     navigate("/login");
   };
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.category-dropdown')) {
+        setCategoryDropdownOpen(false);
+      }
+      if (!event.target.closest('.profile-dropdown')) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const categories = sharedCategories;
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
@@ -201,30 +202,45 @@ const Home = () => {
                 >
                   Khóa học
                 </Link>
-                <div className="relative group">
-                  <button className="px-3 py-2 text-gray-700 dark:text-gray-300 font-medium hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center">
+                <div className="relative category-dropdown">
+                  <button
+                    className="px-3 py-2 text-gray-700 dark:text-gray-300 font-medium hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center"
+                    onClick={() => setCategoryDropdownOpen((open) => !open)}
+                  >
                     Danh mục
                     <ChevronDown className="ml-1 h-4 w-4" />
                   </button>
-                  <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-40 hidden group-hover:block">
-                    {Array.from(
-                      new Set([
-                        "Lập trình",
-                        "Ngoại ngữ",
-                        "Marketing",
-                        "Thiết kế",
-                        "Kinh doanh",
-                      ])
-                    ).map((category, index) => (
-                      <Link
-                        key={index}
-                        to={`/student/courses?category=${category}`}
-                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      >
-                        {category}
-                      </Link>
-                    ))}
-                  </div>
+                  {categoryDropdownOpen && (
+                    <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-40">
+                      {categories.length > 0
+                        ? categories.map((category, index) => (
+                            <Link
+                              key={index}
+                              to={`/student/courses?category=${category}`}
+                              className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              onClick={() => setCategoryDropdownOpen(false)}
+                            >
+                              {category}
+                            </Link>
+                          ))
+                        : [
+                            "Lập trình",
+                            "Ngoại ngữ",
+                            "Marketing",
+                            "Thiết kế",
+                            "Kinh doanh",
+                          ].map((category, index) => (
+                            <Link
+                              key={index}
+                              to={`/student/courses?category=${category}`}
+                              className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              onClick={() => setCategoryDropdownOpen(false)}
+                            >
+                              {category}
+                            </Link>
+                          ))}
+                    </div>
+                  )}
                 </div>
                 <Link
                   to="/about"
@@ -257,38 +273,46 @@ const Home = () => {
 
               {/* Profile dropdown */}
               {isLoggedIn ? (
-                <div className="ml-4 relative group">
-                  <button className="flex items-center text-sm font-medium text-gray-700 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none">
+                <div className="ml-4 relative profile-dropdown">
+                  <button
+                    className="flex items-center text-sm font-medium text-gray-700 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none"
+                    onClick={() => setProfileDropdownOpen((open) => !open)}
+                  >
                     <div className="h-8 w-8 rounded-full bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center text-white">
                       <User size={16} />
                     </div>
                   </button>
-                  <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 hidden group-hover:block z-40">
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      Hồ sơ cá nhân
-                    </Link>
-                    <Link
-                      to="/student/my-courses"
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      Khóa học của tôi
-                    </Link>
-                    <Link
-                      to="/teacher/dashboard"
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      Quản lý giảng dạy
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      Đăng xuất
-                    </button>
-                  </div>
+                  {profileDropdownOpen && (
+                    <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-40">
+                      <Link
+                        to="/profile"
+                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        onClick={() => setProfileDropdownOpen(false)}
+                      >
+                        Hồ sơ cá nhân
+                      </Link>
+                      <Link
+                        to="/student/my-courses"
+                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        onClick={() => setProfileDropdownOpen(false)}
+                      >
+                        Khóa học của tôi
+                      </Link>
+                      <Link
+                        to="/teacher/dashboard"
+                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        onClick={() => setProfileDropdownOpen(false)}
+                      >
+                        Quản lý giảng dạy
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        Đăng xuất
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="md:flex space-x-4 ml-4 hidden">
@@ -434,34 +458,35 @@ const Home = () => {
               Tìm kiếm khóa học phù hợp với mục tiêu học tập của bạn
             </p>
           </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {loading
-              ? // Improved skeleton loading for categories
-                Array(6)
-                  .fill()
-                  .map((_, index) => (
-                    <div
+          <div className="flex justify-center">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+              {loading
+                ? // Improved skeleton loading for categories
+                  Array(5)
+                    .fill()
+                    .map((_, index) => (
+                      <div
+                        key={index}
+                        className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 animate-pulse"
+                      >
+                        <div className="w-12 h-12 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4"></div>
+                        <div className="h-5 bg-gray-300 dark:bg-gray-600 rounded w-20 mx-auto"></div>
+                      </div>
+                    ))
+                : [
+                    ...categories.slice(0, 5).map((cat) => ({
+                      name: cat,
+                      icon: getIconForCategory(cat),
+                    })),
+                    { name: "Tất cả", icon: <BookOpen className="h-8 w-8" /> },
+                  ].map((category, index) => (
+                    <CategoryCard
                       key={index}
-                      className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 animate-pulse"
-                    >
-                      <div className="w-12 h-12 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4"></div>
-                      <div className="h-5 bg-gray-300 dark:bg-gray-600 rounded w-20 mx-auto"></div>
-                    </div>
-                  ))
-              : [
-                  ...categories.slice(0, 5).map((cat) => ({
-                    name: cat,
-                    icon: getIconForCategory(cat),
-                  })),
-                  { name: "Tất cả", icon: <BookOpen className="h-8 w-8" /> },
-                ].map((category, index) => (
-                  <CategoryCard
-                    key={index}
-                    name={category.name}
-                    icon={category.icon}
-                  />
-                ))}
+                      name={category.name}
+                      icon={category.icon}
+                    />
+                  ))}
+            </div>
           </div>
         </div>
       </section>
@@ -495,7 +520,14 @@ const Home = () => {
                 .map((_, index) => <FeaturedCourseSkeleton key={index} />)
             ) : featuredCourses.length > 0 ? (
               featuredCourses.map((course) => (
-                <FeaturedCourseCard key={course.id} course={course} />
+                <FeaturedCourseCard
+                  key={course.id}
+                  course={{
+                    ...course,
+                    price: course.price ? `$${course.price}` : 'Free',
+                    rating: (Math.random() * (5 - 4) + 4).toFixed(1),
+                  }}
+                />
               ))
             ) : (
               <div className="col-span-3 text-center py-8">

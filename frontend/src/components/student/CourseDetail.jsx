@@ -91,7 +91,7 @@ const CourseDetail = () => {
             <div className="aspect-video w-full overflow-hidden bg-gray-200 dark:bg-slate-700">
               {course.thumbnail ? (
                 <img
-                  src={`http://localhost:8000${course.thumbnail}`}
+                  src={course.thumbnail.startsWith('http') ? course.thumbnail : `http://localhost:8000${course.thumbnail}`}
                   alt={course.title}
                   className="w-full h-full object-cover"
                 />
@@ -124,7 +124,7 @@ const CourseDetail = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
               <div className="flex items-center text-gray-600 dark:text-gray-300">
                 <Calendar className="mr-2" size={20} />
-                <span>Xuất bản: {formatDate(course.published_at)}</span>
+                <span>Cập nhật: {course.last_updated_at ? formatDate(course.last_updated_at) : 'Chưa có'}</span>
               </div>
               <div className="flex items-center text-gray-600 dark:text-gray-300">
                 <BookOpen className="mr-2" size={20} />
@@ -134,6 +134,12 @@ const CourseDetail = () => {
                 <Users className="mr-2" size={20} />
                 <span>{course.student_count} học viên đã đăng ký</span>
               </div>
+              {course.quiz_count !== undefined && (
+                <div className="flex items-center text-gray-600 dark:text-gray-300">
+                  <CheckCircle className="mr-2" size={20} />
+                  <span>{course.quiz_count} bài kiểm tra</span>
+                </div>
+              )}
             </div>
 
             <div className="pt-4 flex items-center justify-between">
@@ -197,47 +203,62 @@ const CourseDetail = () => {
                     </div>
 
                     <div className="divide-y divide-gray-200 dark:divide-slate-700">
-                      {section.lessons &&
-                        section.lessons.map((lesson) => (
-                          <div
-                            key={lesson.id}
-                            className={`px-4 py-3 flex items-center justify-between ${
-                              course.is_enrolled
-                                ? "hover:bg-gray-50 dark:hover:bg-slate-700/60 cursor-pointer"
-                                : "opacity-75"
-                            }`}
-                            onClick={() =>
-                              course.is_enrolled
-                                ? navigate(`/student/lessons/${lesson.id}`)
-                                : toast.error(
-                                    "Vui lòng đăng ký khóa học để xem bài giảng"
-                                  )
-                            }
-                          >
-                            <div className="flex items-center">
-                              {lesson.video_url ? (
-                                <Clock
-                                  className="mr-3 text-indigo-500"
-                                  size={18}
-                                />
-                              ) : (
-                                <BookOpen
-                                  className="mr-3 text-indigo-500"
-                                  size={18}
-                                />
-                              )}
-                              <span className="text-gray-700 dark:text-gray-300">
-                                {lesson.title}
-                              </span>
-                            </div>
-                            {!course.is_enrolled && (
-                              <span className="text-xs text-gray-500 dark:text-gray-400">
-                                Khóa
-                              </span>
+                      {section.lessons && section.lessons.map((lesson) => (
+                        <div
+                          key={lesson.id}
+                          className={`px-4 py-3 flex items-center justify-between ${course.is_enrolled ? "hover:bg-gray-50 dark:hover:bg-slate-700/60 cursor-pointer" : "opacity-75"}`}
+                          onClick={() =>
+                            course.is_enrolled
+                              ? navigate(`/student/lessons/${lesson.id}`)
+                              : toast.error("Vui lòng đăng ký khóa học để xem bài giảng")
+                          }
+                        >
+                          <div className="flex items-center">
+                            {lesson.video_url ? (
+                              <Clock className="mr-3 text-indigo-500" size={18} />
+                            ) : (
+                              <BookOpen className="mr-3 text-indigo-500" size={18} />
                             )}
+                            <span className="text-gray-700 dark:text-gray-300">{lesson.title}</span>
                           </div>
-                        ))}
+                          {!course.is_enrolled && (
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Khóa</span>
+                          )}
+                        </div>
+                      ))}
                     </div>
+                    {/* Quizzes for this section */}
+                    {section.quizzes && section.quizzes.length > 0 && (
+                      <div className="bg-blue-50 dark:bg-blue-900/30 border-t border-blue-100 dark:border-blue-800 px-4 py-3">
+                        <div className="font-medium text-blue-700 dark:text-blue-200 mb-2">Bài kiểm tra</div>
+                        <ul className="space-y-2">
+                          {section.quizzes.map((quiz) => (
+                            <li key={quiz.id} className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="text-blue-500" size={18} />
+                                <span className="text-gray-800 dark:text-gray-100">{quiz.title}</span>
+                              </div>
+                              {course.is_enrolled && (
+                                <div className="flex gap-2 ml-auto">
+                                  <button
+                                    className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm"
+                                    onClick={() => navigate(`/student/quizzes/${quiz.id}`)}
+                                  >
+                                    Làm bài
+                                  </button>
+                                  <button
+                                    className="px-3 py-1 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-slate-600 text-sm"
+                                    onClick={() => navigate(`/student/quizzes/${quiz.id}/history`)}
+                                  >
+                                    Xem lịch sử
+                                  </button>
+                                </div>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

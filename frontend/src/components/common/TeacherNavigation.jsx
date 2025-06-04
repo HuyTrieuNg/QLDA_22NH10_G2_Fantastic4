@@ -69,6 +69,11 @@ const TeacherNavigation = () => {
       href: '/teacher/courses',
       icon: BookOpen,
     },
+    {
+      name: 'Thống kê',
+      href: '/teacher/statistics',
+      icon: Settings,
+    },
   ];
 
   const userDropdownItems = [

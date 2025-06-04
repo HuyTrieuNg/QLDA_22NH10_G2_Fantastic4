@@ -26,6 +26,9 @@ import CreateEditSection from "./components/teacher/CreateEditSection";
 import CreateEditLesson from "./components/teacher/CreateEditLesson";
 import CreateEditQuiz from "./components/teacher/CreateEditQuiz";
 import AutoQuizGeneration from "./components/teacher/AutoQuizGeneration";
+import QuizResults from "./components/teacher/QuizResults";
+import TeacherQuizAttemptDetail from "./components/teacher/TeacherQuizAttemptDetail";
+import TeacherStatistics from "./components/teacher/TeacherStatistics";
 
 // Student components
 import StudentLayout from "./components/student/StudentLayout";
@@ -33,7 +36,9 @@ import CourseList from "./components/student/CourseList";
 import StudentCourseDetail from "./components/student/CourseDetail";
 import EnrolledCourses from "./components/student/EnrolledCourses";
 import LessonDetail from "./components/student/LessonDetail";
-
+import StudentQuizPage from "./components/student/StudentQuizPage";
+import StudentQuizHistoryPage from "./components/student/StudentQuizHistoryPage";
+import StudentAllQuizHistoryPage from "./components/student/StudentAllQuizHistoryPage";
 import "./index.css";
 
 function App() {
@@ -74,7 +79,7 @@ function App() {
             <Route
               path="/teacher/sections/:sectionId/edit"
               element={<CreateEditSection isEdit={true} />}
-            />{" "}
+            />
             <Route
               path="/teacher/sections/:sectionId/lessons/create"
               element={<CreateEditLesson isEdit={false} />}
@@ -82,7 +87,7 @@ function App() {
             <Route
               path="/teacher/sections/:sectionId/lessons/:lessonId/edit"
               element={<CreateEditLesson isEdit={true} />}
-            />{" "}
+            />
             <Route
               path="/teacher/sections/:sectionId/quizzes/create"
               element={<CreateEditQuiz isEdit={false} />}
@@ -94,7 +99,19 @@ function App() {
             <Route
               path="/teacher/sections/:sectionId/generate-quiz"
               element={<AutoQuizGeneration />}
+            />            <Route
+              path="/teacher/sections/:sectionId/quizzes/:quizId/results"
+              element={<QuizResults />}
             />
+            <Route
+              path="/teacher/quiz-attempts/:attemptId/detail"
+              element={<TeacherQuizAttemptDetail />}
+            />
+            <Route
+              path="/teacher/sections/:sectionId/quizzes/:quizId/attempts"
+              element={<TeacherQuizAttemptDetail />}
+            />
+            <Route path="/teacher/statistics" element={<TeacherStatistics />} />
           </Route>
 
           {/* Student Routes */}
@@ -104,12 +121,14 @@ function App() {
             <Route path="courses/:courseId" element={<StudentCourseDetail />} />
             <Route path="my-courses" element={<EnrolledCourses />} />
             <Route path="lessons/:lessonId" element={<LessonDetail />} />
+            <Route path="quizzes/:quizId" element={<StudentQuizPage />} />
+            <Route path="quizzes/:quizId/history" element={<StudentQuizHistoryPage />} />
+            <Route path="quiz-history" element={<StudentAllQuizHistoryPage />} />
           </Route>
 
           {/* Redirect to home for undefined routes */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
-
         {/* Toast notifications */}
         <Toaster
           position="top-right"

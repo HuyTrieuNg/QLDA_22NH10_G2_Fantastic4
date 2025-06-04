@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Eye } from 'lucide-react';
 import { courseService } from '../../services/courseService';
+import { categories } from '../../constants/categories';
 import toast from 'react-hot-toast';
 import TeacherLayout from '../common/TeacherLayout';
 
@@ -18,19 +19,6 @@ const EditCourse = () => {
     price: '',
     published: false
   });
-
-  const categories = [
-    'Programming',
-    'Design',
-    'Business',
-    'Marketing',
-    'Photography',
-    'Music',
-    'Health & Fitness',
-    'Language',
-    'Lifestyle',
-    'Personal Development'
-  ];
 
   useEffect(() => {
     fetchCourse();

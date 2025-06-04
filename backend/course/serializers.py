@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Course, Section, Lesson, Quiz, Question, Choice, UserCourse
+from .models import Course, Section, Lesson, Quiz, Question, Choice, UserCourse, QuizAttempt
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -31,11 +31,17 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 class QuizSerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(many=True, read_only=True)
-    
+    section_id = serializers.IntegerField(source='section.id', read_only=True)
+    course_id = serializers.SerializerMethodField()
+
     class Meta:
         model = Quiz
-        fields = ['id', 'title', 'position', 'questions']
-    
+        fields = ['id', 'title', 'position', 'questions', 'section_id', 'course_id']
+
+    def get_course_id(self, obj):
+        # Trả về id của course thông qua section
+        return obj.section.course.id if obj.section and obj.section.course else None
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         # Sắp xếp questions theo position
@@ -186,3 +192,59 @@ class ChoiceCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Choice
         fields = ['text', 'is_correct']
+
+
+class QuizAttemptSerializer(serializers.ModelSerializer):
+    quiz_title = serializers.CharField(source="quiz.title", read_only=True)
+    class Meta:
+        model = QuizAttempt
+        fields = [
+            "id", "quiz", "quiz_title", "score", "correct_count", "total_count", "answers", "submitted_at"
+        ]
+
+
+class TeacherQuizAttemptSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    detailed_answers = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = QuizAttempt
+        fields = [
+            'id', 'user', 'score', 'correct_count', 'total_count', 'answers', 'detailed_answers', 'submitted_at'
+        ]
+    
+    def get_detailed_answers(self, obj):
+        """
+        Return detailed answers with question text and choice text
+        """
+        if not obj.answers:
+            return []
+            
+        detailed = []
+        quiz = obj.quiz
+        questions = quiz.questions.all()
+        
+        for question in questions:
+            qid = str(question.id)
+            selected_choice_id = obj.answers.get(qid)
+            
+            # Get correct choice
+            correct_choice = question.choices.filter(is_correct=True).first()
+            
+            # Get selected choice text
+            selected_choice_text = None
+            if selected_choice_id:
+                try:
+                    selected_choice = question.choices.get(id=selected_choice_id)
+                    selected_choice_text = selected_choice.text
+                except:
+                    selected_choice_text = "Không xác định"
+            
+            detailed.append({
+                "question": question.text,
+                "your_choice": selected_choice_text or "Không trả lời",
+                "correct_choice": correct_choice.text if correct_choice else "Không xác định",
+                "is_correct": str(selected_choice_id) == str(correct_choice.id) if correct_choice and selected_choice_id else False
+            })
+            
+        return detailed
