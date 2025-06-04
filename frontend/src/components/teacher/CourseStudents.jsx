@@ -70,7 +70,6 @@ const CourseStudents = () => {
     if (progress >= 50) return 'bg-yellow-500';
     return 'bg-red-500';
   };
-
   const exportStudentList = () => {
     const csvContent = [
       ['Tên', 'Email', 'Ngày đăng ký', 'Tiến độ (%)'].join(','),
@@ -82,10 +81,16 @@ const CourseStudents = () => {
       ].join(','))
     ].join('\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    // Thêm UTF-8 BOM để hỗ trợ tiếng Việt
+    const BOM = '\uFEFF';
+    const csvWithBOM = BOM + csvContent;
+    
+    const blob = new Blob([csvWithBOM], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `students_${course?.title || 'course'}.csv`;
+
+    // link.download = `danh_sach_hoc_vien_${course?.title?.replace(/[^a-zA-Z0-9]/g, '_') || 'course'}.csv`;
     link.click();
   };
 

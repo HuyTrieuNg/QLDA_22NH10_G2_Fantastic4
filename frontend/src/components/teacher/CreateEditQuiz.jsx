@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import TeacherLayout from '../common/TeacherLayout';
 
 const CreateEditQuiz = ({ isEdit = false }) => {
-  const { sectionId, quizId } = useParams();
+  const { quizId, sectionId } = useParams(); // sectionId cho tạo mới, quizId cho chỉnh sửa
   const navigate = useNavigate();
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
@@ -18,33 +18,63 @@ const CreateEditQuiz = ({ isEdit = false }) => {
   const [questions, setQuestions] = useState([]);
 
   useEffect(() => {
+    
     fetchInitialData();
   }, [sectionId, quizId]);
-
   const fetchInitialData = async () => {
     try {
       setLoading(true);
       
-      if (isEdit && quizId) {
+      // Validate that we have sectionId (required for both create and edit)
+      if (!sectionId) {
+        toast.error('Không thể xác định chương học');
+        navigate(-1);
+        return;
+      }
+        if (isEdit && quizId) {
         // Fetch quiz data for editing
         const quizResponse = await quizService.getQuizDetail(quizId);
         const quiz = quizResponse.data;
+        
+        console.log('Quiz data from API:', quiz); // Debug log
         
         setFormData({
           title: quiz.title || '',
           position: quiz.position || 1
         });
         
-        setQuestions(quiz.questions || []);
+        // Xử lý questions data từ API
+        const questionsFromAPI = quiz.questions || [];
+        const processedQuestions = questionsFromAPI.map(question => ({
+          ...question,
+          // Đảm bảo choices có đủ 4 phần tử cho UI
+          choices: question.choices && question.choices.length > 0 
+            ? [
+                ...question.choices,
+                // Thêm choices trống nếu ít hơn 4
+                ...Array(Math.max(0, 4 - question.choices.length)).fill(null).map((_, index) => ({
+                  id: `temp_choice_${Date.now()}_${question.choices.length + index + 1}`,
+                  text: '',
+                  is_correct: false
+                }))
+              ]
+            : [
+                // Nếu không có choices, tạo 4 choices mặc định
+                { id: `temp_choice_${Date.now()}_1`, text: '', is_correct: true },
+                { id: `temp_choice_${Date.now()}_2`, text: '', is_correct: false },
+                { id: `temp_choice_${Date.now()}_3`, text: '', is_correct: false },
+                { id: `temp_choice_${Date.now()}_4`, text: '', is_correct: false }
+              ]
+        }));
         
-        // Also fetch section info
-        const sectionResponse = await sectionService.getSectionDetail(quiz.section);
-        setSection(sectionResponse.data);
-      } else {
-        // Creating new quiz, just fetch section info
-        const sectionResponse = await sectionService.getSectionDetail(sectionId);
-        setSection(sectionResponse.data);
-        
+        console.log('Processed questions:', processedQuestions); // Debug log
+        setQuestions(processedQuestions);
+      }
+      // Always fetch section info using sectionId from URL
+      const sectionResponse = await sectionService.getSectionDetail(sectionId);
+      setSection(sectionResponse.data);
+      
+      if (!isEdit) {
         // Get quiz count to set position
         const quizzesResponse = await quizService.getSectionQuizzes(sectionId);
         setFormData(prev => ({
@@ -68,7 +98,6 @@ const CreateEditQuiz = ({ isEdit = false }) => {
       [name]: value
     }));
   };
-
   const addQuestion = () => {
     const newQuestion = {
       id: `temp_${Date.now()}`,
@@ -83,9 +112,14 @@ const CreateEditQuiz = ({ isEdit = false }) => {
     };
     setQuestions([...questions, newQuestion]);
   };
-
   const removeQuestion = (questionId) => {
-    setQuestions(questions.filter(q => q.id !== questionId));
+    const updatedQuestions = questions.filter(q => q.id !== questionId);
+    // Reindex positions
+    const reindexedQuestions = updatedQuestions.map((q, index) => ({
+      ...q,
+      position: index + 1
+    }));
+    setQuestions(reindexedQuestions);
   };
 
   const updateQuestion = (questionId, field, value) => {
@@ -152,9 +186,7 @@ const CreateEditQuiz = ({ isEdit = false }) => {
         toast.error('Mỗi câu hỏi cần có ít nhất một đáp án đúng');
         return;
       }
-    }
-
-    try {
+    }    try {
       setSaving(true);
       
       const quizData = {
@@ -165,6 +197,8 @@ const CreateEditQuiz = ({ isEdit = false }) => {
         }))
       };
       
+      console.log('Sending quiz data:', quizData); // Debug log
+      
       if (isEdit) {
         await quizService.updateQuiz(quizId, quizData);
         toast.success('Cập nhật bài kiểm tra thành công!');
@@ -172,8 +206,7 @@ const CreateEditQuiz = ({ isEdit = false }) => {
         await quizService.createQuiz(sectionId, quizData);
         toast.success('Tạo bài kiểm tra thành công!');
       }
-      
-      navigate(`/teacher/courses/${section.course}`);
+      navigate(-1);
     } catch (error) {
       toast.error(isEdit ? 'Không thể cập nhật bài kiểm tra' : 'Không thể tạo bài kiểm tra');
       console.error('Error saving quiz:', error);
@@ -216,8 +249,7 @@ const CreateEditQuiz = ({ isEdit = false }) => {
         {/* Quiz Info */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Thông tin bài kiểm tra</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6">
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
                 Tiêu đề bài kiểm tra *
@@ -231,21 +263,6 @@ const CreateEditQuiz = ({ isEdit = false }) => {
                 placeholder="Ví dụ: Kiểm tra kiến thức Python cơ bản"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="position" className="block text-sm font-medium text-gray-700 mb-2">
-                Vị trí trong chương
-              </label>
-              <input
-                type="number"
-                id="position"
-                name="position"
-                value={formData.position}
-                onChange={handleInputChange}
-                min="1"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -344,6 +361,16 @@ const CreateEditQuiz = ({ isEdit = false }) => {
                   </div>
                 </div>
               ))}
+              <div className="flex justify-center">
+                <button
+                  type="button"
+                  onClick={addQuestion}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Thêm câu hỏi
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -383,9 +410,8 @@ const CreateEditQuiz = ({ isEdit = false }) => {
                   </div>
                 ))}
               </div>
-              
-              <div className="mt-4 text-xs text-gray-500">
-                Tổng số câu hỏi: {questions.length} • Vị trí: {formData.position}
+                <div className="mt-4 text-xs text-gray-500">
+                Tổng số câu hỏi: {questions.length}
               </div>
             </div>
           </div>

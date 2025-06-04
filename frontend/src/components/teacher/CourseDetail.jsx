@@ -198,9 +198,8 @@ const CourseDetail = () => {
                   <span className="text-sm font-medium text-gray-900">
                     {lessonIndex + 1}. {lesson.title}
                   </span>
-                </div>
-                <Link
-                  to={`/teacher/lessons/${lesson.id}/edit`}
+                </div>                <Link
+                  to={`/teacher/sections/${section.id}/lessons/${lesson.id}/edit`}
                   className="text-purple-600 hover:text-purple-700 text-sm"
                 >
                   Chỉnh sửa
@@ -220,9 +219,8 @@ const CourseDetail = () => {
                   <span className="text-sm font-medium text-gray-900">
                     Bài kiểm tra: {quiz.title}
                   </span>
-                </div>
-                <Link
-                  to={`/teacher/quizzes/${quiz.id}/edit`}
+                </div>                <Link
+                  to={`/teacher/sections/${section.id}/quizzes/${quiz.id}/edit`}
                   className="text-blue-600 hover:text-blue-700 text-sm"
                 >
                   Chỉnh sửa
@@ -344,7 +342,7 @@ const CourseDetail = () => {
             className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center"
           >
             <Users className="w-4 h-4 mr-2" />
-            Học viên ({course.students?.length || 0})
+            Học viên
           </Link>
         </div>
       </div>

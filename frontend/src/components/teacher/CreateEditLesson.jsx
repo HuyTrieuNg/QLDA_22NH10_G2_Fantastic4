@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import TeacherLayout from '../common/TeacherLayout';
 
 const CreateEditLesson = ({ isEdit = false }) => {
-  const { sectionId, lessonId } = useParams();
+  const { lessonId, sectionId } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
@@ -21,30 +21,36 @@ const CreateEditLesson = ({ isEdit = false }) => {
   useEffect(() => {
     fetchInitialData();
   }, [sectionId, lessonId]);
-
   const fetchInitialData = async () => {
     try {
       setLoading(true);
-      let sectionIdToFetch = sectionId;
+      
+      // Validate that we have sectionId (required for both create and edit)
+      if (!sectionId) {
+        toast.error('Không thể xác định chương học');
+        navigate(-1);
+        return;
+      }
+      
       if (isEdit && lessonId) {
         // Fetch lesson data for editing
         const lessonResponse = await lessonService.getLessonDetail(lessonId);
         const lesson = lessonResponse.data;
+        
         setFormData({
           title: lesson.title || '',
           content: lesson.content || '',
           video_url: lesson.video_url || '',
-          position: lesson.position || 1
-        });
-        // Lấy đúng sectionId từ lesson.section
-        sectionIdToFetch = lesson.section;
+          position: lesson.position || 1        });
       }
-      // Always fetch section info using correct sectionId
-      const sectionResponse = await sectionService.getSectionDetail(sectionIdToFetch);
+      
+      // Always fetch section info using sectionId from URL
+      const sectionResponse = await sectionService.getSectionDetail(sectionId);
       setSection(sectionResponse.data);
+      
       if (!isEdit) {
         // Get lesson count to set position
-        const lessonsResponse = await lessonService.getSectionLessons(sectionIdToFetch);
+        const lessonsResponse = await lessonService.getSectionLessons(sectionId);
         setFormData(prev => ({
           ...prev,
           position: lessonsResponse.data.length + 1
@@ -77,7 +83,6 @@ const CreateEditLesson = ({ isEdit = false }) => {
     // Bắt buộc phải có content
     return formData.content && formData.content.trim().length > 0;
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.title.trim()) {
@@ -106,7 +111,7 @@ const CreateEditLesson = ({ isEdit = false }) => {
         await lessonService.createLesson(sectionId, safeFormData);
         toast.success('Tạo bài học thành công!');
       }
-      navigate(`/teacher/courses/${section.course}`);
+      navigate(-1);
     } catch (error) {
       toast.error(isEdit ? 'Không thể cập nhật bài học' : 'Không thể tạo bài học');
       console.error('Error saving lesson:', error);
@@ -208,26 +213,12 @@ const CreateEditLesson = ({ isEdit = false }) => {
             <p className="mt-1 text-sm text-gray-500">
               Nội dung có thể bao gồm text, markdown, hoặc HTML đơn giản. Bắt buộc phải nhập nội dung.
             </p>
-          </div>
-
-          {/* Position */}
-          <div className="mb-6">
-            <label htmlFor="position" className="block text-sm font-medium text-gray-700 mb-2">
-              Vị trí trong chương
-            </label>
-            <input
-              type="number"
-              id="position"
-              name="position"
-              value={formData.position}
-              onChange={handleInputChange}
-              min="1"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            />
-            <p className="mt-1 text-sm text-gray-500">
-              Thứ tự hiển thị của bài học trong chương
-            </p>
-          </div>
+          </div>          {/* Position - Hidden but kept in formData for backend compatibility */}
+          <input
+            type="hidden"
+            name="position"
+            value={formData.position}
+          />
         </div>
 
         {/* Preview */}

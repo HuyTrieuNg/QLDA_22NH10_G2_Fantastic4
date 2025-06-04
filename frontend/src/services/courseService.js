@@ -71,6 +71,9 @@ export const quizService = {
   // Get quizzes for section
   getSectionQuizzes: (sectionId) => api.get(`/sections/${sectionId}/quizzes/`),
   
+  // Get quiz detail
+  getQuizDetail: (id) => api.get(`/quizzes/${id}/`),
+  
   // Create quiz
   createQuiz: (sectionId, data) => api.post(`/sections/${sectionId}/quizzes/`, data),
   

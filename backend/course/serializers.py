@@ -21,6 +21,12 @@ class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = ['id', 'text', 'position', 'choices']
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Sắp xếp choices theo thứ tự tạo (hoặc có thể thêm position field cho Choice)
+        data['choices'] = sorted(data['choices'], key=lambda x: x['id'])
+        return data
 
 
 class QuizSerializer(serializers.ModelSerializer):
@@ -29,6 +35,12 @@ class QuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quiz
         fields = ['id', 'title', 'position', 'questions']
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Sắp xếp questions theo position
+        data['questions'] = sorted(data['questions'], key=lambda x: x['position'])
+        return data
 
 
 class LessonSerializer(serializers.ModelSerializer):
@@ -74,26 +86,9 @@ class CourseCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = [
-            'id', 'title', 'subtitle', 'description', 'published', 
-            'thumbnail', 'category', 'price', 'created_at', 'last_updated_at'
+            'title', 'subtitle', 'description', 'published', 
+            'thumbnail', 'category', 'price'
         ]
-        read_only_fields = ['created_at', 'last_updated_at']
-    
-    def validate_thumbnail(self, value):
-        """
-        Xác thực file thumbnail upload
-        """
-        if value:
-            # Kiểm tra kích thước file (tối đa 5MB)
-            if value.size > 5 * 1024 * 1024:
-                raise serializers.ValidationError("Kích thước file không được vượt quá 5MB.")
-            
-            # Kiểm tra loại file
-            allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-            if value.content_type not in allowed_types:
-                raise serializers.ValidationError("Chỉ chấp nhận file ảnh định dạng JPEG, PNG hoặc WebP.")
-        
-        return value
 
 
 class UserCourseSerializer(serializers.ModelSerializer):
@@ -118,9 +113,67 @@ class LessonCreateUpdateSerializer(serializers.ModelSerializer):
 
 
 class QuizCreateUpdateSerializer(serializers.ModelSerializer):
+    questions = serializers.ListField(child=serializers.DictField(), write_only=True, required=False)
+    
     class Meta:
         model = Quiz
-        fields = ['title', 'position']
+        fields = ['title', 'position', 'questions']
+    
+    def create(self, validated_data):
+        questions_data = validated_data.pop('questions', [])
+        quiz = Quiz.objects.create(**validated_data)
+        
+        # Tạo questions và choices
+        for i, question_data in enumerate(questions_data):
+            choices_data = question_data.pop('choices', [])
+            question = Question.objects.create(
+                quiz=quiz,
+                text=question_data.get('text', ''),
+                position=question_data.get('position', i + 1)
+            )
+            
+            # Tạo choices cho question
+            for choice_data in choices_data:
+                choice_text = choice_data.get('text', '').strip()
+                if choice_text:  # Chỉ tạo choice có text
+                    Choice.objects.create(
+                        question=question,
+                        text=choice_text,
+                        is_correct=choice_data.get('is_correct', False)                    )
+        
+        return quiz
+    
+    def update(self, instance, validated_data):
+        questions_data = validated_data.pop('questions', [])
+        
+        # Cập nhật quiz
+        instance.title = validated_data.get('title', instance.title)
+        instance.position = validated_data.get('position', instance.position)
+        instance.save()
+        
+        # Xóa tất cả questions cũ (và choices sẽ tự động xóa theo cascade)
+        instance.questions.all().delete()
+        
+        # Tạo lại questions và choices
+        for i, question_data in enumerate(questions_data):
+            choices_data = question_data.pop('choices', [])
+            question = Question.objects.create(
+                quiz=instance,
+                text=question_data.get('text', ''),
+                position=question_data.get('position', i + 1)
+            )
+            
+            # Tạo choices cho question
+            for choice_data in choices_data:
+                choice_text = choice_data.get('text', '').strip()
+                if choice_text:  # Chỉ tạo choice có text
+                    Choice.objects.create(
+                        question=question,
+                        text=choice_text,
+                        is_correct=choice_data.get('is_correct', False)
+                    )
+        
+        return instance
 
 
 class QuestionCreateUpdateSerializer(serializers.ModelSerializer):

@@ -55,11 +55,10 @@ function App() {
             <Route path="/teacher/courses/:id/students" element={<CourseStudents />} />
               {/* Section Content Routes */}
             <Route path="/teacher/courses/:id/sections/create" element={<CreateEditSection isEdit={false} />} />
-            <Route path="/teacher/sections/:sectionId/edit" element={<CreateEditSection isEdit={true} />} />
-            <Route path="/teacher/sections/:sectionId/lessons/create" element={<CreateEditLesson isEdit={false} />} />
-            <Route path="/teacher/lessons/:lessonId/edit" element={<CreateEditLesson isEdit={true} />} />
+            <Route path="/teacher/sections/:sectionId/edit" element={<CreateEditSection isEdit={true} />} />            <Route path="/teacher/sections/:sectionId/lessons/create" element={<CreateEditLesson isEdit={false} />} />
+            <Route path="/teacher/sections/:sectionId/lessons/:lessonId/edit" element={<CreateEditLesson isEdit={true} />} />
             <Route path="/teacher/sections/:sectionId/quizzes/create" element={<CreateEditQuiz isEdit={false} />} />
-            <Route path="/teacher/quizzes/:quizId/edit" element={<CreateEditQuiz isEdit={true} />} />
+            <Route path="/teacher/sections/:sectionId/quizzes/:quizId/edit" element={<CreateEditQuiz isEdit={true} />} />
           </Route>
 
           {/* Redirect to home for undefined routes */}
