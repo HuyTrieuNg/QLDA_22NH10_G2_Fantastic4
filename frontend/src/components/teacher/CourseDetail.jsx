@@ -95,6 +95,32 @@ const CourseDetail = () => {
     }
   };
 
+  const handleDeleteLesson = async (lessonId, lessonTitle) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa bài học "${lessonTitle}"?`)) {
+      try {
+        await lessonService.deleteLesson(lessonId);
+        toast.success('Xóa bài học thành công!');
+        fetchCourseData(); // Refresh data
+      } catch (error) {
+        toast.error('Không thể xóa bài học');
+        console.error('Error deleting lesson:', error);
+      }
+    }
+  };
+
+  const handleDeleteQuiz = async (quizId, quizTitle) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa bài kiểm tra "${quizTitle}"?`)) {
+      try {
+        await quizService.deleteQuiz(quizId);
+        toast.success('Xóa bài kiểm tra thành công!');
+        fetchCourseData(); // Refresh data
+      } catch (error) {
+        toast.error('Không thể xóa bài kiểm tra');
+        console.error('Error deleting quiz:', error);
+      }
+    }
+  };
+
   const handleSectionReorder = async (newOrder) => {
     try {
       // Update local state immediately for better UX
@@ -189,8 +215,7 @@ const CourseDetail = () => {
       <div className="space-y-4">
         {/* Section Content when expanded */}
         {expandedSections.has(section.id) && (
-          <div className="ml-6 space-y-2">
-            {/* Lessons */}
+          <div className="ml-6 space-y-2">            {/* Lessons */}
             {section.lessons?.map((lesson, lessonIndex) => (
               <div key={lesson.id} className="flex items-center p-3 bg-gray-50 rounded-lg">
                 <Play className="w-4 h-4 text-purple-600 mr-3" />
@@ -198,20 +223,29 @@ const CourseDetail = () => {
                   <span className="text-sm font-medium text-gray-900">
                     {lessonIndex + 1}. {lesson.title}
                   </span>
-                </div>                <Link
-                  to={`/teacher/sections/${section.id}/lessons/${lesson.id}/edit`}
-                  className="text-purple-600 hover:text-purple-700 text-sm"
-                >
-                  Chỉnh sửa
-                </Link>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Link
+                    to={`/teacher/sections/${section.id}/lessons/${lesson.id}/edit`}
+                    className="text-purple-600 hover:text-purple-700 text-sm px-2 py-1 rounded hover:bg-purple-50"
+                  >
+                    Chỉnh sửa
+                  </Link>
+                  <button
+                    onClick={() => handleDeleteLesson(lesson.id, lesson.title)}
+                    className="text-red-600 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50 flex items-center"
+                    title="Xóa bài học"
+                  >
+                    <Trash2 className="w-3 h-3 mr-1" />
+                    Xóa
+                  </button>
+                </div>
               </div>
             )) || (
               <div className="text-center py-4 text-gray-500 text-sm">
                 Chưa có bài học nào
               </div>
-            )}
-
-            {/* Quizzes */}
+            )}            {/* Quizzes */}
             {section.quizzes?.map((quiz, quizIndex) => (
               <div key={quiz.id} className="flex items-center p-3 bg-blue-50 rounded-lg">
                 <HelpCircle className="w-4 h-4 text-blue-600 mr-3" />
@@ -219,12 +253,23 @@ const CourseDetail = () => {
                   <span className="text-sm font-medium text-gray-900">
                     Bài kiểm tra: {quiz.title}
                   </span>
-                </div>                <Link
-                  to={`/teacher/sections/${section.id}/quizzes/${quiz.id}/edit`}
-                  className="text-blue-600 hover:text-blue-700 text-sm"
-                >
-                  Chỉnh sửa
-                </Link>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Link
+                    to={`/teacher/sections/${section.id}/quizzes/${quiz.id}/edit`}
+                    className="text-blue-600 hover:text-blue-700 text-sm px-2 py-1 rounded hover:bg-blue-100"
+                  >
+                    Chỉnh sửa
+                  </Link>
+                  <button
+                    onClick={() => handleDeleteQuiz(quiz.id, quiz.title)}
+                    className="text-red-600 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50 flex items-center"
+                    title="Xóa bài kiểm tra"
+                  >
+                    <Trash2 className="w-3 h-3 mr-1" />
+                    Xóa
+                  </button>
+                </div>
               </div>
             )) || null}
 
