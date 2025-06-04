@@ -14,7 +14,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True, required=True)
-    user_type = serializers.ChoiceField(choices=UserProfile.USER_TYPE_CHOICES, required=True)
+    user_type = serializers.ChoiceField(choices=UserProfile.USER_TYPE_CHOICES, write_only=True, required=True)
 
     class Meta:
         model = User
@@ -28,13 +28,24 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Mật khẩu không khớp."})
+        try:
+            validate_password(attrs['password'])
+        except Exception as e:
+            raise serializers.ValidationError({"password": list(e.messages)})
         return attrs
 
     def create(self, validated_data):
-        user_type = validated_data.pop('user_type')
-        validated_data.pop('password2')
-        user = User.objects.create_user(**validated_data)
-        UserProfile.objects.create(user=user, user_type=user_type)
+        user_type = validated_data.pop('user_type', 'student')
+        validated_data.pop('password2', None)
+        try:
+            user = User(**validated_data)
+            user._user_type = user_type  # Gán tạm user_type để signal lấy
+            user.set_password(validated_data['password'])
+            user.save()
+            print("✅ User created:", user.username)
+        except Exception as e:
+            print("❌ Error creating user:", e)
+            raise serializers.ValidationError({"detail": "Lỗi khi tạo user."})
         return user
 
 class LoginSerializer(serializers.Serializer):
