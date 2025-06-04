@@ -1,4 +1,4 @@
-import api from "../api/axiosConfig";
+import api from "./api/axiosConfig";
 
 // Lấy danh sách users (chỉ cho giáo viên và admin)
 export const getUsers = (page = 1, limit = 10) => {

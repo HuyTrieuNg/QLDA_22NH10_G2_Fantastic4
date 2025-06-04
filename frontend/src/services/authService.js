@@ -1,4 +1,4 @@
-import api from "../api/axiosConfig";
+import api from "./api/axiosConfig";
 
 // Đăng nhập
 export const login = (credentials) => {
