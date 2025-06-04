@@ -74,9 +74,26 @@ class CourseCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = [
-            'title', 'subtitle', 'description', 'published', 
-            'thumbnail', 'category', 'price'
+            'id', 'title', 'subtitle', 'description', 'published', 
+            'thumbnail', 'category', 'price', 'created_at', 'last_updated_at'
         ]
+        read_only_fields = ['created_at', 'last_updated_at']
+    
+    def validate_thumbnail(self, value):
+        """
+        Xác thực file thumbnail upload
+        """
+        if value:
+            # Kiểm tra kích thước file (tối đa 5MB)
+            if value.size > 5 * 1024 * 1024:
+                raise serializers.ValidationError("Kích thước file không được vượt quá 5MB.")
+            
+            # Kiểm tra loại file
+            allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+            if value.content_type not in allowed_types:
+                raise serializers.ValidationError("Chỉ chấp nhận file ảnh định dạng JPEG, PNG hoặc WebP.")
+        
+        return value
 
 
 class UserCourseSerializer(serializers.ModelSerializer):
