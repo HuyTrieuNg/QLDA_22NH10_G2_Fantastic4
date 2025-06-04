@@ -95,7 +95,7 @@ const TeacherCourses = () => {
         </div>
         <Link
           to="/teacher/courses/create"
-          className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+          className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-colors shadow-lg transform hover:scale-105"
         >
           <Plus className="w-5 h-5 mr-2" />
           Tạo khóa học mới
@@ -111,7 +111,7 @@ const TeacherCourses = () => {
             placeholder="Tìm kiếm khóa học..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500"
           />
         </div>
         <div className="relative">
@@ -119,7 +119,7 @@ const TeacherCourses = () => {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none bg-white"
+            className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 appearance-none bg-white"
           >
             <option value="all">Tất cả</option>
             <option value="published">Đã xuất bản</option>
@@ -138,7 +138,7 @@ const TeacherCourses = () => {
           </p>
           <Link
             to="/teacher/courses/create"
-            className="mt-6 inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            className="mt-6 inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-colors shadow-lg transform hover:scale-105"
           >
             <Plus className="w-5 h-5 mr-2" />
             Tạo khóa học mới
@@ -147,7 +147,7 @@ const TeacherCourses = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCourses.map((course) => (
-            <div key={course.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+            <div key={course.id} className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden hover:shadow-2xl transition-shadow">
               {/* Course Thumbnail */}
               <div className="relative h-48 bg-gray-200">
                 {course.thumbnail ? (

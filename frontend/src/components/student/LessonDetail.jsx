@@ -10,6 +10,23 @@ const LessonDetail = () => {
   const [lesson, setLesson] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Hàm lấy videoId từ URL YouTube
+  const getYouTubeVideoId = (url) => {
+    if (!url) return null;
+    // Thử trích videoId từ nhiều dạng URL YouTube
+    const regexList = [
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&]+)/,
+      /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([^?&]+)/,
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^?&]+)/,
+    ];
+
+    for (const regex of regexList) {
+      const match = url.match(regex);
+      if (match && match[1]) return match[1];
+    }
+    return null;
+  };
+
   useEffect(() => {
     const fetchLessonDetail = async () => {
       try {
@@ -63,6 +80,9 @@ const LessonDetail = () => {
     );
   }
 
+  // Lấy video ID
+  const videoId = getYouTubeVideoId(lesson.video_url);
+
   return (
     <div className="space-y-8">
       {/* Breadcrumb */}
@@ -90,14 +110,20 @@ const LessonDetail = () => {
 
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-md overflow-hidden">
         {/* Video Player */}
-        {lesson.video_url && (
+        {videoId ? (
           <div className="aspect-video w-full bg-black">
             <iframe
               className="w-full h-full"
-              src={lesson.video_url}
+              src={`https://www.youtube.com/embed/${videoId}`}
               title={lesson.title}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             ></iframe>
+          </div>
+        ) : (
+          <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+            Không có video để hiển thị
           </div>
         )}
 
@@ -108,13 +134,13 @@ const LessonDetail = () => {
               {lesson.title}
             </h1>
             <div className="flex items-center space-x-2 text-gray-500 dark:text-gray-400">
-              {lesson.video_url ? (
+              {videoId ? (
                 <Video className="inline" size={18} />
               ) : (
                 <BookOpen className="inline" size={18} />
               )}
               <span className="text-sm">
-                {lesson.video_url ? "Video bài giảng" : "Bài đọc"}
+                {videoId ? "Video bài giảng" : "Bài đọc"}
               </span>
             </div>
           </div>

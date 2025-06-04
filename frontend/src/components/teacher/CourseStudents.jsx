@@ -134,7 +134,7 @@ const CourseStudents = () => {
         </div>
         <button
           onClick={exportStudentList}
-          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center"
+          className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 shadow-lg transform hover:scale-105 flex items-center"
         >
           <Download className="w-4 h-4 mr-2" />
           Xuất danh sách
@@ -143,7 +143,7 @@ const CourseStudents = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-10 hover:shadow-2xl">
           <div className="flex items-center">
             <Users className="w-8 h-8 text-purple-600" />
             <div className="ml-4">
@@ -153,7 +153,7 @@ const CourseStudents = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-10 hover:shadow-2xl">
           <div className="flex items-center">
             <TrendingUp className="w-8 h-8 text-green-600" />
             <div className="ml-4">
@@ -167,7 +167,7 @@ const CourseStudents = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-10 hover:shadow-2xl">
           <div className="flex items-center">
             <Calendar className="w-8 h-8 text-blue-600" />
             <div className="ml-4">
@@ -184,7 +184,7 @@ const CourseStudents = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-10 hover:shadow-2xl">
           <div className="flex items-center">
             <TrendingUp className="w-8 h-8 text-orange-600" />
             <div className="ml-4">
@@ -198,7 +198,7 @@ const CourseStudents = () => {
       </div>
 
       {/* Search and Filter */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-2xl p-8 mb-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -207,7 +207,7 @@ const CourseStudents = () => {
               placeholder="Tìm kiếm theo tên, email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-blue-500 text-lg px-5"
             />
           </div>
         </div>
@@ -317,7 +317,7 @@ const CourseStudents = () => {
 
       {/* Summary */}
       {filteredStudents.length > 0 && (
-        <div className="mt-6 bg-gray-50 rounded-lg p-4">
+        <div className="mt-6 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-2xl p-8">
           <div className="flex justify-between text-sm text-gray-600">
             <span>
               Hiển thị {filteredStudents.length} trong tổng số {students.length} học viên
