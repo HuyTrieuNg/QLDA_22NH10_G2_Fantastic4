@@ -5,7 +5,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from "react-hot-toast";
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import ForgotPassword from "./components/auth/ForgotPassword";
@@ -27,6 +27,13 @@ import CreateEditLesson from "./components/teacher/CreateEditLesson";
 import CreateEditQuiz from "./components/teacher/CreateEditQuiz";
 import AutoQuizGeneration from "./components/teacher/AutoQuizGeneration";
 
+// Student components
+import StudentLayout from "./components/student/StudentLayout";
+import CourseList from "./components/student/CourseList";
+import StudentCourseDetail from "./components/student/CourseDetail";
+import EnrolledCourses from "./components/student/EnrolledCourses";
+import LessonDetail from "./components/student/LessonDetail";
+
 import "./index.css";
 
 function App() {
@@ -45,46 +52,83 @@ function App() {
             {/* User Profile Routes */}
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/change-password" element={<ChangePassword />} />
-
             {/* Teacher Routes */}
-            <Route path="/teacher" element={<Navigate to="/teacher/dashboard" replace />} />
+            <Route
+              path="/teacher"
+              element={<Navigate to="/teacher/dashboard" replace />}
+            />
             <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
             <Route path="/teacher/courses" element={<TeacherCourses />} />
             <Route path="/teacher/courses/create" element={<CreateCourse />} />
             <Route path="/teacher/courses/:id" element={<CourseDetail />} />
             <Route path="/teacher/courses/:id/edit" element={<EditCourse />} />
-            <Route path="/teacher/courses/:id/students" element={<CourseStudents />} />
-              {/* Section Content Routes */}
-            <Route path="/teacher/courses/:id/sections/create" element={<CreateEditSection isEdit={false} />} />
-            <Route path="/teacher/sections/:sectionId/edit" element={<CreateEditSection isEdit={true} />} />            <Route path="/teacher/sections/:sectionId/lessons/create" element={<CreateEditLesson isEdit={false} />} />
-            <Route path="/teacher/sections/:sectionId/lessons/:lessonId/edit" element={<CreateEditLesson isEdit={true} />} />            <Route path="/teacher/sections/:sectionId/quizzes/create" element={<CreateEditQuiz isEdit={false} />} />
-            <Route path="/teacher/sections/:sectionId/quizzes/:quizId/edit" element={<CreateEditQuiz isEdit={true} />} />
-            <Route path="/teacher/sections/:sectionId/generate-quiz" element={<AutoQuizGeneration />} />
+            <Route
+              path="/teacher/courses/:id/students"
+              element={<CourseStudents />}
+            />
+            {/* Section Content Routes */}
+            <Route
+              path="/teacher/courses/:id/sections/create"
+              element={<CreateEditSection isEdit={false} />}
+            />
+            <Route
+              path="/teacher/sections/:sectionId/edit"
+              element={<CreateEditSection isEdit={true} />}
+            />{" "}
+            <Route
+              path="/teacher/sections/:sectionId/lessons/create"
+              element={<CreateEditLesson isEdit={false} />}
+            />
+            <Route
+              path="/teacher/sections/:sectionId/lessons/:lessonId/edit"
+              element={<CreateEditLesson isEdit={true} />}
+            />{" "}
+            <Route
+              path="/teacher/sections/:sectionId/quizzes/create"
+              element={<CreateEditQuiz isEdit={false} />}
+            />
+            <Route
+              path="/teacher/sections/:sectionId/quizzes/:quizId/edit"
+              element={<CreateEditQuiz isEdit={true} />}
+            />
+            <Route
+              path="/teacher/sections/:sectionId/generate-quiz"
+              element={<AutoQuizGeneration />}
+            />
+          </Route>
+
+          {/* Student Routes */}
+          <Route path="/student" element={<StudentLayout />}>
+            <Route index element={<Navigate to="/student/courses" replace />} />
+            <Route path="courses" element={<CourseList />} />
+            <Route path="courses/:courseId" element={<StudentCourseDetail />} />
+            <Route path="my-courses" element={<EnrolledCourses />} />
+            <Route path="lessons/:lessonId" element={<LessonDetail />} />
           </Route>
 
           {/* Redirect to home for undefined routes */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
-        
+
         {/* Toast notifications */}
-        <Toaster 
+        <Toaster
           position="top-right"
           toastOptions={{
             duration: 4000,
             style: {
-              background: '#363636',
-              color: '#fff',
+              background: "#363636",
+              color: "#fff",
             },
             success: {
               style: {
-                background: '#10B981',
-                color: '#fff',
+                background: "#10B981",
+                color: "#fff",
               },
             },
             error: {
               style: {
-                background: '#EF4444',
-                color: '#fff',
+                background: "#EF4444",
+                color: "#fff",
               },
             },
           }}
