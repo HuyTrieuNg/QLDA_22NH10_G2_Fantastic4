@@ -197,7 +197,7 @@ const TeacherDashboard = () => {
                         <div className="flex items-center space-x-4 text-sm text-gray-500">
                           <div className="flex items-center">
                             <Users className="w-4 h-4 mr-1" />
-                            {course.students?.length || 0} học viên
+                            {course.student_count || 0} học viên
                           </div>
                           <div className="flex items-center">
                             <Calendar className="w-4 h-4 mr-1" />

@@ -4,6 +4,7 @@ import { ArrowLeft, Save, Eye } from 'lucide-react';
 import { courseService } from '../../services/courseService';
 import toast from 'react-hot-toast';
 import TeacherLayout from '../common/TeacherLayout';
+import { categories } from '../../constants/categories';
 
 const CreateCourse = () => {
   const navigate = useNavigate();
@@ -18,18 +19,7 @@ const CreateCourse = () => {
     published: false
   });
 
-  const categories = [
-    'Programming',
-    'Design',
-    'Business',
-    'Marketing',
-    'Photography',
-    'Music',
-    'Health & Fitness',
-    'Language',
-    'Lifestyle',
-    'Personal Development'
-  ];
+
   const validateForm = () => {
     const errors = {};
 

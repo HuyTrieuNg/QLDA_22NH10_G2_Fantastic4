@@ -1,23 +1,53 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, User, LogOut, Bookmark, Home } from "lucide-react";
+import { Menu, User, LogOut, Bookmark, Home, Clock, BookOpen } from "lucide-react";
 
 const StudentHeader = () => {
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [profileDropdown, setProfileDropdown] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [profileDropdown, setProfileDropdown] = useState(false);
 
   const userData = JSON.parse(localStorage.getItem("userData") || "{}");
 
+  // Ref cho 2 menu để detect click ngoài
+  const menuRef = useRef(null);
+  const profileRef = useRef(null);
+
   const toggleMenu = () => {
-    setIsOpen(!isOpen);
-    if (profileDropdown) setProfileDropdown(false);
+    setIsOpen((prev) => {
+      // Nếu menu sắp mở thì đóng profile
+      if (!prev) setProfileDropdown(false);
+      return !prev;
+    });
   };
 
   const toggleProfile = () => {
-    setProfileDropdown(!profileDropdown);
-    if (isOpen) setIsOpen(false);
+    setProfileDropdown((prev) => {
+      // Nếu profile sắp mở thì đóng menu
+      if (!prev) setIsOpen(false);
+      return !prev;
+    });
   };
+
+  // Đóng dropdown nếu click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        profileRef.current &&
+        !profileRef.current.contains(event.target)
+      ) {
+        setIsOpen(false);
+        setProfileDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
@@ -53,6 +83,7 @@ const StudentHeader = () => {
               to="/student/courses"
               className="text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-white transition"
             >
+              <BookOpen className="inline-block mr-1" size={18} />
               Khóa học
             </Link>
             <Link
@@ -62,12 +93,19 @@ const StudentHeader = () => {
               <Bookmark className="inline-block mr-1" size={18} />
               Khóa học của tôi
             </Link>
+            <Link
+              to="/student/quiz-history"
+              className="text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-white transition"
+            >
+              <Clock className="inline-block mr-1" size={18} />
+              Lịch sử làm bài
+            </Link>
           </nav>
 
           {/* User Profile & Mobile Menu Button */}
           <div className="flex items-center">
             {/* Profile Dropdown */}
-            <div className="relative ml-3">
+            <div className="relative ml-3" ref={profileRef}>
               <button
                 onClick={toggleProfile}
                 className="flex items-center space-x-2 text-gray-700 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none"
@@ -90,6 +128,13 @@ const StudentHeader = () => {
                   >
                     Hồ sơ
                   </Link>
+                  <Link
+                    to="/student/quiz-history"
+                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-indigo-100 dark:hover:bg-slate-600"
+                    onClick={() => setProfileDropdown(false)}
+                  >
+                    <Clock className="inline-block mr-1" size={16} /> Lịch sử làm bài
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="w-full text-left block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-indigo-100 dark:hover:bg-slate-600"
@@ -102,47 +147,53 @@ const StudentHeader = () => {
             </div>
 
             {/* Mobile Menu Button */}
-            <div className="md:hidden ml-4">
+            <div className="md:hidden ml-4" ref={menuRef}>
               <button
                 onClick={toggleMenu}
                 className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none"
               >
                 <Menu size={24} />
               </button>
+
+              {/* Mobile Navigation Menu */}
+              {isOpen && (
+                <div className="absolute right-0 mt-12 w-48 bg-white dark:bg-slate-700 rounded-md shadow-lg z-50 py-1">
+                  <Link
+                    to="/"
+                    className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-indigo-100 dark:hover:bg-slate-700 rounded-md"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Home className="inline-block mr-2" size={18} />
+                    Trang chủ
+                  </Link>
+                  <Link
+                    to="/student/courses"
+                    className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-indigo-100 dark:hover:bg-slate-700 rounded-md"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Khóa học
+                  </Link>
+                  <Link
+                    to="/student/my-courses"
+                    className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-indigo-100 dark:hover:bg-slate-700 rounded-md"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Bookmark className="inline-block mr-2" size={18} />
+                    Khóa học của tôi
+                  </Link>
+                  <Link
+                    to="/student/quiz-history"
+                    className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-indigo-100 dark:hover:bg-slate-700 rounded-md"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Clock className="inline-block mr-2" size={18} />
+                    Lịch sử làm bài
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
-
-        {/* Mobile Navigation Menu */}
-        {isOpen && (
-          <div className="md:hidden py-3 border-t border-gray-200 dark:border-slate-700">
-            <div className="flex flex-col space-y-2">
-              <Link
-                to="/"
-                className="px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-indigo-100 dark:hover:bg-slate-700 rounded-md"
-                onClick={toggleMenu}
-              >
-                <Home className="inline-block mr-2" size={18} />
-                Trang chủ
-              </Link>
-              <Link
-                to="/student/courses"
-                className="px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-indigo-100 dark:hover:bg-slate-700 rounded-md"
-                onClick={toggleMenu}
-              >
-                Khóa học
-              </Link>
-              <Link
-                to="/student/my-courses"
-                className="px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-indigo-100 dark:hover:bg-slate-700 rounded-md"
-                onClick={toggleMenu}
-              >
-                <Bookmark className="inline-block mr-2" size={18} />
-                Khóa học của tôi
-              </Link>
-            </div>
-          </div>
-        )}
       </div>
     </header>
   );

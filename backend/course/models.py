@@ -82,4 +82,18 @@ class UserCourse(models.Model):
         return f"{self.user.username} - {self.course.title}"
 
 
-    
+
+class QuizAttempt(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="quiz_attempts")
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="attempts")
+    score = models.FloatField()
+    correct_count = models.PositiveIntegerField()
+    total_count = models.PositiveIntegerField()
+    answers = models.JSONField()  # {question_id: selected_choice_id}
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-submitted_at"]
+
+    def __str__(self):
+        return f"{self.user.username} - {self.quiz.title} - {self.score}/10"

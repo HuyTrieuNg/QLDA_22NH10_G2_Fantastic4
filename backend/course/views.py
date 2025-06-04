@@ -1,28 +1,29 @@
+import logging
 from django.shortcuts import render, get_object_or_404
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from django.contrib.auth.models import User
 from django.db.models import Q, Count
-from django.db import models
-import logging
+from django.contrib.auth.models import User
+import json
 
 # Import custom permissions
 from user.permissions import IsTeacherOrAdmin, IsTeacher, IsStudent, IsOwnerOrAdminOrTeacher
 
 # Import models and serializers
-from .models import Course, Section, Lesson, Quiz, Question, Choice, UserCourse
+from .models import Course, Section, Lesson, Quiz, Question, Choice, UserCourse, QuizAttempt
 from .serializers import (
     CourseSerializer, CourseCreateUpdateSerializer, SectionSerializer, 
     LessonSerializer, QuizSerializer, QuestionSerializer, ChoiceSerializer,
     UserCourseSerializer, SectionCreateUpdateSerializer, LessonCreateUpdateSerializer,
-    QuizCreateUpdateSerializer, QuestionCreateUpdateSerializer, ChoiceCreateUpdateSerializer
+    QuizCreateUpdateSerializer, QuestionCreateUpdateSerializer, ChoiceCreateUpdateSerializer,
+    QuizAttemptSerializer, UserSerializer, TeacherQuizAttemptSerializer
 )
 
 # Import utils for AI quiz generation
-from .utils import generate_quiz_from_lessons, generate_quiz_from_selected_lessons
+from .utils import generate_quiz_from_lessons, generate_quiz_from_selected_lessons, generate_quiz_feedback_with_ai
 
 logger = logging.getLogger(__name__)
 
@@ -365,7 +366,7 @@ class QuizListCreateView(generics.ListCreateAPIView):
         if not (section.course.creator == self.request.user or 
                 self.request.user.is_staff or
                 (hasattr(self.request.user, 'profile') and 
-                 self.request.user.profile.user_type in ['teacher', 'admin'])):
+                 request.user.profile.user_type in ['teacher', 'admin'])):
             self.permission_denied(self.request)
         
         serializer.save(section=section)
@@ -605,3 +606,244 @@ def generate_auto_quiz(request, section_id):
             {"error": "Đã xảy ra lỗi khi tạo quiz. Vui lòng thử lại sau."}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+# Teacher Quiz Results View
+@api_view(['GET'])
+@permission_classes([IsTeacherOrAdmin])
+def teacher_quiz_results(request, quiz_id):
+    """
+    API endpoint: GET /api/teacher/quizzes/<quiz_id>/results/
+    Trả về danh sách các lần làm bài kiểm tra của học viên cho quiz này
+    """
+    quiz = get_object_or_404(Quiz, id=quiz_id)
+    attempts = QuizAttempt.objects.filter(quiz=quiz).select_related('user').order_by('-submitted_at')
+    serializer = TeacherQuizAttemptSerializer(attempts, many=True)
+    return Response({'quiz_id': quiz.id, 'quiz_title': quiz.title, 'results': serializer.data})
+
+
+# Teacher Quiz Attempt Detail View
+@api_view(['GET'])
+@permission_classes([IsTeacherOrAdmin])
+def teacher_quiz_attempt_detail(request, attempt_id):
+    """
+    API endpoint: GET /api/teacher/quiz-attempts/<attempt_id>/detail/
+    Trả về chi tiết một lần làm bài cụ thể cho giáo viên
+    """
+    attempt = get_object_or_404(QuizAttempt, id=attempt_id)
+    serializer = TeacherQuizAttemptSerializer(attempt)
+    return Response(serializer.data)
+
+
+# Teacher Quiz AI Feedback View
+@api_view(['POST'])
+@permission_classes([IsTeacherOrAdmin])
+def teacher_quiz_attempt_ai_feedback(request, attempt_id):
+    """
+    API endpoint: POST /api/teacher/quiz-attempts/<attempt_id>/ai-feedback/
+    Giáo viên lấy nhận xét AI cho bất kỳ bài làm nào
+    """
+    attempt = get_object_or_404(QuizAttempt, id=attempt_id)
+    quiz = attempt.quiz
+    questions = quiz.questions.all()
+    answers = attempt.answers or {}
+    answer_detail = []
+    correct = 0
+    total = questions.count()
+    for q in questions:
+        qid = str(q.id)
+        selected = answers.get(qid)
+        correct_choice = q.choices.filter(is_correct=True).first()
+        is_correct = str(getattr(correct_choice, 'id', None)) == str(selected)
+        if is_correct:
+            correct += 1
+        answer_detail.append({
+            "question": q.text,
+            "your_choice": selected,
+            "correct_choice": str(getattr(correct_choice, 'id', None)),
+        })
+    quiz_result = {
+        "score": attempt.score,
+        "correct": correct,
+        "total": total,
+        "answers": answer_detail,
+        "attempt_id": attempt.id,
+        "submitted_at": str(attempt.submitted_at)
+    }
+    prompt = (
+        "Bạn là một trợ lý học tập. Hãy đánh giá kết quả bài kiểm tra trắc nghiệm của học sinh và đưa ra phản hồi chi tiết.\n\n"
+        "Yêu cầu:\n"
+        "1. Đưa ra **điểm mạnh** của học sinh: nêu rõ các phần kiến thức hoặc dạng câu hỏi học sinh làm tốt.\n"
+        "2. Chỉ ra **kiến thức hoặc kỹ năng học sinh cần cải thiện**: liệt kê các chủ đề hoặc dạng câu hỏi mà học sinh làm sai hoặc còn yếu.\n"
+        "3. Gợi ý **hướng học tập tiếp theo** để cải thiện kết quả trong tương lai (ngắn gọn).\n\n"
+        "**Yêu cầu định dạng:**\n"
+        "- Trả về kết quả ở dạng markdown, sử dụng tiêu đề, danh sách, in đậm, in nghiêng, bảng nếu cần.\n"
+        "- Không giải thích thêm, chỉ trả về markdown, 3 yêu cầu in đậm, từ khóa in nghiêng\n\n"
+        "Thông tin đầu vào: kết quả bài kiểm tra sau:\n"
+        f"{json.dumps(quiz_result, ensure_ascii=False, indent=2)}"
+    )
+    feedback = generate_quiz_feedback_with_ai(prompt)
+    if not feedback:
+        return Response({"detail": "Không thể tạo nhận xét AI. Vui lòng thử lại sau."}, status=500)
+    return Response({"feedback": feedback})
+
+
+# Teacher Statistics View
+@api_view(['GET'])
+@permission_classes([IsTeacherOrAdmin])
+def teacher_statistics(request):
+    """
+    API endpoint: GET /api/teacher/statistics/
+    - Không có ?ai=1: chỉ trả về số liệu cho biểu đồ (nhanh)
+    - Có ?ai=1: chỉ trả về nhận xét AI (có thể chậm)
+    """
+    user = request.user
+    # --- Số liệu thống kê ---
+    # Doanh thu theo tháng (giả lập)
+    months = ["01/2025", "02/2025", "03/2025", "04/2025", "05/2025"]
+    revenue = [12000000, 15000000, 18000000, 21000000, 25000000]
+    revenue_chart = {
+        "labels": months,
+        "datasets": [{
+            "label": "Doanh thu (VNĐ)",
+            "data": revenue,
+            "backgroundColor": "#4f46e5"
+        }]
+    }
+    # Số học viên mới theo tháng (giả lập)
+    new_students = [30, 45, 60, 80, 100]
+    new_students_chart = {
+        "labels": months,
+        "datasets": [{
+            "label": "Học viên mới",
+            "data": new_students,
+            "borderColor": "#22d3ee",
+            "backgroundColor": "#a5f3fc"
+        }]
+    }
+    # Điểm trung bình các khóa học (giả lập)
+    course_names = ["Python", "Toán", "Văn", "Anh", "Lý"]
+    avg_scores = [8.2, 7.5, 8.8, 7.9, 8.0]
+    course_scores_chart = {
+        "labels": course_names,
+        "datasets": [{
+            "label": "Điểm trung bình",
+            "data": avg_scores,
+            "backgroundColor": "#a78bfa"
+        }]
+    }
+    # Thống kê tổng số khóa học, đã xuất bản, bản nháp, tổng học viên
+    from .models import Course, UserCourse, QuizAttempt
+    from django.db.models import Sum, Avg, F
+    from django.utils import timezone
+    from datetime import datetime, timedelta
+
+    # --- Dynamic statistics ---
+    # Revenue by month (sum of course.price for each enrollment in UserCourse)
+    # Đơn vị tiền là USD, không dùng VND
+    user_courses = UserCourse.objects.filter(course__creator=user)
+    # Get all months in the last 5 months
+    now = timezone.now()
+    months = []
+    for i in range(4, -1, -1):
+        month = (now - timedelta(days=now.day-1)).replace(day=1) - timedelta(days=30*i)
+        months.append(month.strftime('%m/%Y'))
+    months = months[::-1]
+    # Revenue and new students per month
+    revenue = []
+    new_students = []
+    for m in months:
+        month_dt = datetime.strptime(m, '%m/%Y')
+        month_start = month_dt.replace(day=1)
+        if month_start.month == 12:
+            month_end = month_start.replace(year=month_start.year+1, month=1)
+        else:
+            month_end = month_start.replace(month=month_start.month+1)
+        month_enrolls = user_courses.filter(enrolled_at__gte=month_start, enrolled_at__lt=month_end)
+        # Revenue: sum of course.price for each enrollment (USD)
+        month_revenue_usd = sum([uc.course.price or 0 for uc in month_enrolls])
+        revenue.append(float(month_revenue_usd))
+        new_students.append(month_enrolls.count())
+    revenue_chart = {
+        "labels": months,
+        "datasets": [{
+            "label": "Doanh thu (USD)",
+            "data": revenue,
+            "backgroundColor": "#4f46e5"
+        }]
+    }
+    new_students_chart = {
+        "labels": months,
+        "datasets": [{
+            "label": "Học viên mới",
+            "data": new_students,
+            "borderColor": "#22d3ee",
+            "backgroundColor": "#a5f3fc"
+        }]
+    }
+    # Average course scores (by QuizAttempt)
+    courses = Course.objects.filter(creator=user)
+    course_names = []
+    avg_scores = []
+    for course in courses:
+        quiz_ids = course.sections.values_list('quizzes__id', flat=True)
+        attempts = QuizAttempt.objects.filter(quiz_id__in=quiz_ids)
+        avg_score = attempts.aggregate(avg=Avg('score'))['avg']
+        course_names.append(course.title)
+        avg_scores.append(round(avg_score, 2) if avg_score is not None else 0)
+    course_scores_chart = {
+        "labels": course_names,
+        "datasets": [{
+            "label": "Điểm trung bình",
+            "data": avg_scores,
+            "backgroundColor": "#a78bfa"
+        }]
+    }
+    # Thống kê tổng số khóa học, đã xuất bản, bản nháp, tổng học viên
+    total_courses = courses.count()
+    published_courses = courses.filter(published=True).count()
+    draft_courses = courses.filter(published=False).count()
+    total_students = user_courses.count()
+    # Nếu chỉ lấy số liệu (không có ?ai=1)
+    if not request.GET.get('ai'):
+        return Response({
+            "revenue_chart": revenue_chart,
+            "new_students_chart": new_students_chart,
+            "course_scores_chart": course_scores_chart,
+            "total_courses": total_courses,
+            "published_courses": published_courses,
+            "draft_courses": draft_courses,
+            "total_students": total_students,
+            "ai_feedback": ""
+        })
+    # Nếu có ?ai=1 thì chỉ trả về nhận xét AI động dựa trên số liệu thực tế
+    if request.GET.get('ai'):
+        # Chuẩn bị dữ liệu thống kê thực tế
+        summary = {
+            "Tổng số khóa học": total_courses,
+            "Khóa học đã xuất bản": published_courses,
+            "Bản nháp": draft_courses,
+            "Tổng học viên": total_students,
+            "Doanh thu theo tháng (USD)": revenue,
+            "Số học viên mới theo tháng": new_students,
+            "Điểm trung bình từng khóa học": dict(zip(course_names, avg_scores)),
+        }
+        prompt = (
+            "Bạn là một trợ lý AI cho giáo viên. Hãy phân tích số liệu thống kê sau và đưa ra nhận xét, khuyến nghị chi tiết.\n\n"
+            "Yêu cầu:\n"
+            "1. Đưa ra **tổng quan** về hiệu quả hoạt động dựa trên số liệu.\n"
+            "2. Chỉ ra **điểm mạnh** và **điểm cần cải thiện**.\n"
+            "3. Đề xuất **hành động tiếp theo** để nâng cao hiệu quả.\n\n"
+            "**Nội quy markdown:**\n"
+            "- Mỗi tiêu đề (heading) phải bắt đầu bằng dấu # hoặc ## và có một dòng trống phía trước.\n"
+            "- Danh sách phải bắt đầu bằng dấu - hoặc * và có dòng trống phía trước.\n"
+            "- In đậm dùng **text**, in nghiêng dùng *text*.\n"
+            "- Không dùng ký tự lạ, không escape ký tự xuống dòng.\n"
+            "- Đảm bảo markdown dễ đọc, dễ render trên web.Có đáng số đề mục. Đề mục in đậm, từ khóa in nghiêng\n"
+            "- Không giải thích thêm, chỉ trả về markdown.\n\n"
+            f"Số liệu thống kê:\n{json.dumps(summary, ensure_ascii=False, indent=2)}"
+        )
+        feedback = generate_quiz_feedback_with_ai(prompt)
+        if not feedback:
+            return Response({"ai_feedback": "Không thể tạo nhận xét AI. Vui lòng thử lại sau."}, status=500)
+        return Response({"ai_feedback": feedback})

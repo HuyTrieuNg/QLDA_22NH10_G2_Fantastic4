@@ -229,16 +229,16 @@ const CourseDetail = () => {
                   <Link
                     to={`/teacher/sections/${section.id}/lessons/${lesson.id}/edit`}
                     className="text-purple-600 hover:text-purple-700 text-sm px-2 py-1 rounded hover:bg-purple-50"
+                    title="Chỉnh sửa bài học"
                   >
-                    Chỉnh sửa
+                    <Edit className="w-4 h-4" />
                   </Link>
                   <button
                     onClick={() => handleDeleteLesson(lesson.id, lesson.title)}
                     className="text-red-600 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50 flex items-center"
                     title="Xóa bài học"
                   >
-                    <Trash2 className="w-3 h-3 mr-1" />
-                    Xóa
+                    <Trash2 className="w-3 h-3" />
                   </button>
                 </div>
               </div>
@@ -259,16 +259,23 @@ const CourseDetail = () => {
                   <Link
                     to={`/teacher/sections/${section.id}/quizzes/${quiz.id}/edit`}
                     className="text-blue-600 hover:text-blue-700 text-sm px-2 py-1 rounded hover:bg-blue-100"
+                    title="Chỉnh sửa bài kiểm tra"
                   >
-                    Chỉnh sửa
+                    <Edit className="w-4 h-4" />
+                  </Link>
+                  <Link
+                    to={`/teacher/sections/${section.id}/quizzes/${quiz.id}/results`}
+                    className="text-green-600 hover:text-green-700 text-sm px-2 py-1 rounded hover:bg-green-100"
+                    title="Xem kết quả bài kiểm tra"
+                  >
+                    <Eye className="w-4 h-4" />
                   </Link>
                   <button
                     onClick={() => handleDeleteQuiz(quiz.id, quiz.title)}
                     className="text-red-600 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50 flex items-center"
                     title="Xóa bài kiểm tra"
                   >
-                    <Trash2 className="w-3 h-3 mr-1" />
-                    Xóa
+                    <Trash2 className="w-3 h-3" />
                   </button>
                 </div>
               </div>
@@ -466,7 +473,7 @@ const CourseDetail = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Học viên:</span>
-                  <span className="font-medium">{course.students?.length || 0}</span>
+                  <span className="font-medium">{course.student_count || 0}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Ngày tạo:</span>
@@ -636,3 +643,7 @@ const CourseDetail = () => {
 };
 
 export default CourseDetail;
+
+// TODO: Cần API endpoint backend cho giáo viên lấy kết quả bài kiểm tra của quiz này, ví dụ:
+// GET /api/teacher/quizzes/{quiz_id}/results/
+// Trả về danh sách học viên đã làm, điểm số, chi tiết từng lần làm, ...

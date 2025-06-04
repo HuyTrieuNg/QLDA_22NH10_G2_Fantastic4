@@ -63,7 +63,8 @@ const AutoQuizGeneration = () => {
       // Dismiss loading toast
       toast.dismiss('generating-quiz');
       
-      setGeneratedQuestions(response.data.questions || []);
+      // Nối tiếp câu hỏi mới vào danh sách cũ thay vì thay thế hoàn toàn
+      setGeneratedQuestions(prev => [...prev, ...(response.data.questions || [])]);
       toast.success(`Đã tạo ${response.data.num_questions} câu hỏi thành công!`);
     } catch (error) {
       // Dismiss loading toast
