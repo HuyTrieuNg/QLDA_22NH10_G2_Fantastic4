@@ -66,3 +66,9 @@ export const removeAuthTokens = () => {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
 };
+
+// Kiểm tra xem người dùng đã đăng nhập hay chưa
+export const isAuthenticated = () => {
+  const token = getAccessToken();
+  return !!token; // Returns true if token exists, false otherwise
+};

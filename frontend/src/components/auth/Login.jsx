@@ -44,10 +44,14 @@ const Login = () => {
       // Lưu user_type vào localStorage (dùng key userType)
       if (response.data.user_type) {
         localStorage.setItem("userType", response.data.user_type);
-        // Điều hướng
+        // Điều hướng theo vai trò
         const userType = response.data.user_type;
-        if (!userType) {
-          navigate("/");
+        if (userType === "admin") {
+          navigate("/admin/dashboard");
+        } else if (userType === "teacher") {
+          navigate("/teacher/dashboard");
+        } else if (userType === "student") {
+          navigate("/student/courses");
         } else {
           navigate("/profile");
         }

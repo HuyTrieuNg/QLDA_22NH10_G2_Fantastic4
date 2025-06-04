@@ -9,6 +9,7 @@ urlpatterns = [
     path('api/auth/', include('user.urls')),
     path('api/', include('course.urls')),
     path('api/student/', include('student.urls', namespace='student')),
+    path('api/admin-panel/', include('admin_panel.urls')),
 ]
 
 # Serve media files in development

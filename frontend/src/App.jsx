@@ -15,6 +15,17 @@ import ChangePassword from "./components/user/ChangePassword";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./components/Home";
 
+// Admin components
+import AdminRoute from "./components/admin/AdminRoute";
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./components/admin/dashboard/AdminDashboard";
+import UserManagement from "./components/admin/users/UserManagement";
+import CourseManagement from "./components/admin/courses/CourseManagement";
+import ContentManagement from "./components/admin/content/ContentManagement";
+import SystemConfiguration from "./components/admin/system/SystemConfiguration";
+import AuditLogs from "./components/admin/logs/AuditLogs";
+import { AuthProvider } from "./context/AuthContext";
+
 // Teacher components
 import TeacherDashboard from "./components/teacher/TeacherDashboard";
 import TeacherCourses from "./components/teacher/TeacherCourses";
@@ -39,101 +50,131 @@ import "./index.css";
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
+      <AuthProvider>
+        <div className="min-h-screen bg-gray-50">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
-          {/* Protected routes */}
-          <Route element={<ProtectedRoute />}>
-            {/* User Profile Routes */}
-            <Route path="/profile" element={<UserProfile />} />
-            <Route path="/change-password" element={<ChangePassword />} />
-            {/* Teacher Routes */}
-            <Route
-              path="/teacher"
-              element={<Navigate to="/teacher/dashboard" replace />}
-            />
-            <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
-            <Route path="/teacher/courses" element={<TeacherCourses />} />
-            <Route path="/teacher/courses/create" element={<CreateCourse />} />
-            <Route path="/teacher/courses/:id" element={<CourseDetail />} />
-            <Route path="/teacher/courses/:id/edit" element={<EditCourse />} />
-            <Route
-              path="/teacher/courses/:id/students"
-              element={<CourseStudents />}
-            />
-            {/* Section Content Routes */}
-            <Route
-              path="/teacher/courses/:id/sections/create"
-              element={<CreateEditSection isEdit={false} />}
-            />
-            <Route
-              path="/teacher/sections/:sectionId/edit"
-              element={<CreateEditSection isEdit={true} />}
-            />{" "}
-            <Route
-              path="/teacher/sections/:sectionId/lessons/create"
-              element={<CreateEditLesson isEdit={false} />}
-            />
-            <Route
-              path="/teacher/sections/:sectionId/lessons/:lessonId/edit"
-              element={<CreateEditLesson isEdit={true} />}
-            />{" "}
-            <Route
-              path="/teacher/sections/:sectionId/quizzes/create"
-              element={<CreateEditQuiz isEdit={false} />}
-            />
-            <Route
-              path="/teacher/sections/:sectionId/quizzes/:quizId/edit"
-              element={<CreateEditQuiz isEdit={true} />}
-            />
-            <Route
-              path="/teacher/sections/:sectionId/generate-quiz"
-              element={<AutoQuizGeneration />}
-            />
-          </Route>
+            {/* Protected routes */}
+            <Route element={<ProtectedRoute />}>
+              {/* User Profile Routes */}
+              <Route path="/profile" element={<UserProfile />} />
+              <Route path="/change-password" element={<ChangePassword />} />
+              {/* Teacher Routes */}
+              <Route
+                path="/teacher"
+                element={<Navigate to="/teacher/dashboard" replace />}
+              />
+              <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+              <Route path="/teacher/courses" element={<TeacherCourses />} />
+              <Route
+                path="/teacher/courses/create"
+                element={<CreateCourse />}
+              />
+              <Route path="/teacher/courses/:id" element={<CourseDetail />} />
+              <Route
+                path="/teacher/courses/:id/edit"
+                element={<EditCourse />}
+              />
+              <Route
+                path="/teacher/courses/:id/students"
+                element={<CourseStudents />}
+              />
+              {/* Section Content Routes */}
+              <Route
+                path="/teacher/courses/:id/sections/create"
+                element={<CreateEditSection isEdit={false} />}
+              />
+              <Route
+                path="/teacher/sections/:sectionId/edit"
+                element={<CreateEditSection isEdit={true} />}
+              />{" "}
+              <Route
+                path="/teacher/sections/:sectionId/lessons/create"
+                element={<CreateEditLesson isEdit={false} />}
+              />
+              <Route
+                path="/teacher/sections/:sectionId/lessons/:lessonId/edit"
+                element={<CreateEditLesson isEdit={true} />}
+              />{" "}
+              <Route
+                path="/teacher/sections/:sectionId/quizzes/create"
+                element={<CreateEditQuiz isEdit={false} />}
+              />
+              <Route
+                path="/teacher/sections/:sectionId/quizzes/:quizId/edit"
+                element={<CreateEditQuiz isEdit={true} />}
+              />
+              <Route
+                path="/teacher/sections/:sectionId/generate-quiz"
+                element={<AutoQuizGeneration />}
+              />
+            </Route>
 
-          {/* Student Routes */}
-          <Route path="/student" element={<StudentLayout />}>
-            <Route index element={<Navigate to="/student/courses" replace />} />
-            <Route path="courses" element={<CourseList />} />
-            <Route path="courses/:courseId" element={<StudentCourseDetail />} />
-            <Route path="my-courses" element={<EnrolledCourses />} />
-            <Route path="lessons/:lessonId" element={<LessonDetail />} />
-          </Route>
+            {/* Student Routes */}
+            <Route path="/student" element={<StudentLayout />}>
+              <Route
+                index
+                element={<Navigate to="/student/courses" replace />}
+              />
+              <Route path="courses" element={<CourseList />} />
+              <Route
+                path="courses/:courseId"
+                element={<StudentCourseDetail />}
+              />
+              <Route path="my-courses" element={<EnrolledCourses />} />
+              <Route path="lessons/:lessonId" element={<LessonDetail />} />
+            </Route>
 
-          {/* Redirect to home for undefined routes */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
+            {/* Redirect to home for undefined routes */}
+            {/* Admin Routes */}
+            <Route element={<AdminRoute />}>
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route
+                  index
+                  element={<Navigate to="/admin/dashboard" replace />}
+                />
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="users" element={<UserManagement />} />
+                <Route path="courses" element={<CourseManagement />} />
+                {/* <Route path="content" element={<ContentManagement />} /> */}
+                <Route path="system" element={<SystemConfiguration />} />
+                <Route path="audit-logs" element={<AuditLogs />} />
+              </Route>
+            </Route>
 
-        {/* Toast notifications */}
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: "#363636",
-              color: "#fff",
-            },
-            success: {
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+
+          {/* Toast notifications */}
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
               style: {
-                background: "#10B981",
+                background: "#363636",
                 color: "#fff",
               },
-            },
-            error: {
-              style: {
-                background: "#EF4444",
-                color: "#fff",
+              success: {
+                style: {
+                  background: "#10B981",
+                  color: "#fff",
+                },
               },
-            },
-          }}
-        />
-      </div>
+              error: {
+                style: {
+                  background: "#EF4444",
+                  color: "#fff",
+                },
+              },
+            }}
+          />
+        </div>
+      </AuthProvider>
     </Router>
   );
 }

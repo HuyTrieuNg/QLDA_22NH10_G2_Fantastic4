@@ -7,16 +7,16 @@ from .models.user_profile import UserProfile
 def create_user_profile(sender, instance, created, **kwargs):
     """Create a UserProfile whenever a new User is created."""
     if created:
-        UserProfile.objects.create(user=instance, user_type='student')
+        if not hasattr(instance, 'profile'):
+            user_type = getattr(instance, '_user_type', 'student')
+            UserProfile.objects.create(user=instance, user_type=user_type)
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     """Update the UserProfile whenever User is updated."""
-    # Get or create profile if it doesn't exist
     profile, created = UserProfile.objects.get_or_create(
         user=instance,
         defaults={'user_type': 'student'}
     )
-    
     if not created:
         profile.save()

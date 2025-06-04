@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'user',
     'course',
     'student',
+    'admin_panel',
 ]
 
 MIDDLEWARE = [
@@ -60,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'admin_panel.middleware.AdminAuditMiddleware',
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
