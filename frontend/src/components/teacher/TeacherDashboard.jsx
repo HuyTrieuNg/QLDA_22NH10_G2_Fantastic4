@@ -79,7 +79,7 @@ const TeacherDashboard = () => {
         </div>
         <Link
           to="/teacher/courses/create"
-          className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+          className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-colors shadow-lg transform hover:scale-105"
         >
           <Plus className="w-5 h-5 mr-2" />
           Tạo khóa học mới
@@ -88,7 +88,7 @@ const TeacherDashboard = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 hover:shadow-2xl transition-shadow">
           <div className="flex items-center">
             <BookOpen className="w-8 h-8 text-purple-600" />
             <div className="ml-4">
@@ -100,7 +100,7 @@ const TeacherDashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 hover:shadow-2xl transition-shadow">
           <div className="flex items-center">
             <Eye className="w-8 h-8 text-green-600" />
             <div className="ml-4">
@@ -112,7 +112,7 @@ const TeacherDashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 hover:shadow-2xl transition-shadow">
           <div className="flex items-center">
             <Users className="w-8 h-8 text-blue-600" />
             <div className="ml-4">
@@ -124,7 +124,7 @@ const TeacherDashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 hover:shadow-2xl transition-shadow">
           <div className="flex items-center">
             <Star className="w-8 h-8 text-yellow-600" />
             <div className="ml-4">
@@ -143,8 +143,8 @@ const TeacherDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Recent Courses */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg shadow-md">
-            <div className="p-6 border-b border-gray-200">
+          <div className="bg-white rounded-2xl shadow-xl">
+            <div className="p-8 border-b border-gray-100">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-gray-900">Khóa học gần đây</h2>
                 <Link
@@ -156,7 +156,7 @@ const TeacherDashboard = () => {
               </div>
             </div>
 
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-gray-100">
               {recentCourses.length === 0 ? (
                 <div className="p-6 text-center">
                   <BookOpen className="mx-auto h-12 w-12 text-gray-400" />
@@ -168,7 +168,7 @@ const TeacherDashboard = () => {
                   </p>
                   <Link
                     to="/teacher/courses/create"
-                    className="mt-6 inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                    className="mt-6 inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700"
                   >
                     <Plus className="w-5 h-5 mr-2" />
                     Tạo khóa học
@@ -234,7 +234,7 @@ const TeacherDashboard = () => {
         {/* Quick Actions & Tips */}
         <div className="space-y-6">
           {/* Quick Actions */}
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 hover:shadow-2xl transition-shadow">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Thao tác nhanh</h3>
             <div className="space-y-3">
               <Link
@@ -252,7 +252,7 @@ const TeacherDashboard = () => {
                 Quản lý khóa học
               </Link>
               <Link
-                to="/teacher/profile"
+                to="/profile"
                 className="flex items-center p-3 text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <Edit className="w-5 h-5 mr-3" />
@@ -263,7 +263,7 @@ const TeacherDashboard = () => {
 
           {/* Performance Overview */}
           {dashboardData?.popular_course && (
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 hover:shadow-2xl transition-shadow">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Khóa học nổi bật
               </h3>
@@ -289,20 +289,18 @@ const TeacherDashboard = () => {
           )}
 
           {/* Tips */}
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 hover:shadow-2xl transition-shadow">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Mẹo cho giáo viên</h3>
             <div className="space-y-3 text-sm text-gray-600">
               <div className="flex items-start">
                 <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                <p>Cập nhật ảnh thumbnail cho khóa học trong trang Profile để thu hút học viên</p>
+                <p>Sử dụng tính năng tạo bài kiểm tra tự động để tiết kiệm thời gian xây dựng nội dung.</p>
               </div>
               <div className="flex items-start">
                 <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                <p>Thêm mô tả chi tiết và danh mục phù hợp để khóa học dễ tìm kiếm hơn</p>
+                <p>Thường xuyên gửi thông báo cho học viên qua email để duy trì sự tương tác.</p>
               </div>
-              <div className="flex items-start">
-                <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>                <p>Tương tác với học viên thông qua email để tăng mức độ hài lòng</p>
-              </div>
+             
             </div>
           </div>
         </div>

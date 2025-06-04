@@ -403,7 +403,7 @@ const CourseDetail = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Course Info */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">            {/* Thumbnail */}
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">            {/* Thumbnail */}
             <div className="relative h-48 bg-gray-200 flex items-center justify-center group">
               {course.thumbnail ? (
                 <img
@@ -491,16 +491,16 @@ const CourseDetail = () => {
 
         {/* Course Content */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg shadow-md">
+          <div className="bg-white rounded-2xl shadow-xl">
             {/* Content Header */}
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-gray-900">Nội dung khóa học</h2>
                 <button
                   onClick={() => setShowSectionForm(true)}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center"
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold text-lg shadow-lg hover:from-blue-700 hover:to-purple-700 hover:scale-105 transition-all"
                 >
-                  <Plus className="w-4 h-4 mr-2" />
+                  <Plus className="w-4 h-4 mr-2 inline" />
                   Thêm chương
                 </button>
               </div>
@@ -508,19 +508,19 @@ const CourseDetail = () => {
 
             {/* Add Section Form */}
             {showSectionForm && (
-              <div className="p-6 border-b border-gray-200 bg-gray-50">
+              <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
                 <form onSubmit={handleCreateSection} className="flex gap-2">
                   <input
                     type="text"
                     value={newSectionTitle}
                     onChange={(e) => setNewSectionTitle(e.target.value)}
                     placeholder="Tên chương mới..."
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="flex-1 px-5 py-3 rounded-xl border border-gray-300 focus:ring-blue-500"
                     autoFocus
                   />
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold text-lg shadow-lg hover:from-blue-700 hover:to-purple-700 hover:scale-105 transition-all"
                   >
                     Thêm
                   </button>
@@ -530,7 +530,7 @@ const CourseDetail = () => {
                       setShowSectionForm(false);
                       setNewSectionTitle('');
                     }}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
+                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-semibold"
                   >
                     Hủy
                   </button>
@@ -549,7 +549,7 @@ const CourseDetail = () => {
                   </p>
                   <button
                     onClick={() => setShowSectionForm(true)}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold text-lg shadow-lg hover:from-blue-700 hover:to-purple-700 hover:scale-105 transition-all"
                   >
                     <Plus className="w-4 h-4 mr-2 inline" />
                     Tạo chương đầu tiên
