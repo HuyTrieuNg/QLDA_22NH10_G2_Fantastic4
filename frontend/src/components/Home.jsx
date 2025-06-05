@@ -51,6 +51,7 @@ import FeaturedCourseSkeleton from "./FeaturedCourseSkeleton";
 import CategoryCard from "./CategoryCard";
 import Footer from "./Footer";
 import { categories as sharedCategories } from "../constants/categories";
+import DarkModeToggle from "./common/DarkModeToggle";
 
 // Function to get an icon based on category name
 const getIconForCategory = (category) => {
@@ -259,8 +260,11 @@ const Home = () => {
 
             {/* Search, User profile, Mobile menu button */}
             <div className="flex items-center">
+              {/* Dark Mode Toggle */}
+              <DarkModeToggle />
+
               {/* Search form - desktop */}
-              <div className="hidden md:block">
+              <div className="hidden md:block ml-4">
                 <div className="relative">
                   <input
                     type="text"

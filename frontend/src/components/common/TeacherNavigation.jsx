@@ -1,16 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  BookOpen, 
-  User, 
-  Settings, 
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  LayoutDashboard,
+  BookOpen,
+  User,
+  Settings,
   LogOut,
   Menu,
   X,
-  ChevronDown
-} from 'lucide-react';
-import { getUserProfile } from '../../services/authService';
+  ChevronDown,
+  GraduationCap,
+  BarChart3,
+} from "lucide-react";
+import { getUserProfile } from "../../services/authService";
+import DarkModeToggle from "./DarkModeToggle";
 
 const TeacherNavigation = () => {
   const location = useLocation();
@@ -28,7 +31,7 @@ const TeacherNavigation = () => {
         const response = await getUserProfile();
         setUserData(response.data);
       } catch (error) {
-        console.error('Error fetching user profile:', error);
+        console.error("Error fetching user profile:", error);
       } finally {
         setLoading(false);
       }
@@ -45,98 +48,90 @@ const TeacherNavigation = () => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('accessToken'); // For backward compatibility
-    navigate('/');
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("accessToken"); // For backward compatibility
+    navigate("/");
   };
 
   const navigationItems = [
     {
-      name: 'Dashboard',
-      href: '/teacher/dashboard',
+      name: "Dashboard",
+      href: "/teacher/dashboard",
       icon: LayoutDashboard,
     },
     {
-      name: 'Khóa học',
-      href: '/teacher/courses',
+      name: "Khóa học",
+      href: "/teacher/courses",
       icon: BookOpen,
     },
     {
-      name: 'Thống kê',
-      href: '/teacher/statistics',
-      icon: Settings,
-    },
-  ];
-
-  const userDropdownItems = [
-    {
-      name: 'Hồ sơ',
-      href: '/profile',
-      icon: User,
-    },
-    {
-      name: 'Đổi mật khẩu',
-      href: '/change-password',
-      icon: Settings,
+      name: "Thống kê",
+      href: "/teacher/statistics",
+      icon: BarChart3,
     },
   ];
 
   const isActive = (href) => {
-    if (href === '/teacher/dashboard') {
+    if (href === "/teacher/dashboard") {
       return location.pathname === href;
     }
     return location.pathname.startsWith(href);
   };
 
   const getDisplayName = () => {
-    if (!userData) return 'User';
-    const firstName = userData.first_name || '';
-    const lastName = userData.last_name || '';
-    return firstName && lastName ? `${firstName} ${lastName}` : userData.username;
+    if (!userData) return "User";
+    const firstName = userData.first_name || "";
+    const lastName = userData.last_name || "";
+    return firstName && lastName
+      ? `${firstName} ${lastName}`
+      : userData.username;
   };
 
   const getAvatarInitials = () => {
-    if (!userData) return 'U';
-    const firstName = userData.first_name || '';
-    const lastName = userData.last_name || '';
+    if (!userData) return "U";
+    const firstName = userData.first_name || "";
+    const lastName = userData.last_name || "";
     if (firstName && lastName) {
       return `${firstName[0]}${lastName[0]}`.toUpperCase();
     }
-    return userData.username ? userData.username[0].toUpperCase() : 'U';
+    return userData.username ? userData.username[0].toUpperCase() : "U";
   };
 
   return (
-    <nav className="bg-white shadow-sm border-b">
+    <nav className="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Left side - Logo and main nav */}
-          <div className="flex">
+          <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
-              <Link to="/teacher/dashboard" className="text-xl font-bold text-purple-600">
-                Smart Learning
+              <Link to="/teacher/dashboard" className="flex items-center">
+                <GraduationCap className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
+                <span className="ml-2 text-xl font-bold text-gray-800 dark:text-white">
+                  EduLearn
+                </span>
               </Link>
             </div>
-            
+
             {/* Desktop navigation */}
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+            <nav className="hidden md:ml-8 md:flex md:space-x-8">
               {navigationItems.map((item) => {
                 const Icon = item.icon;
                 return (
                   <Link
                     key={item.name}
                     to={item.href}
-                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                    className={`inline-flex items-center px-3 py-2 text-sm font-medium ${
                       isActive(item.href)
-                        ? 'border-purple-500 text-purple-600'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                        ? "text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400"
+                        : "text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
                     }`}
                   >
                     <Icon className="w-4 h-4 mr-2" />
@@ -144,112 +139,73 @@ const TeacherNavigation = () => {
                   </Link>
                 );
               })}
-            </div>
-          </div>          {/* Right side - User dropdown */}
-          <div className="hidden sm:ml-6 sm:flex sm:items-center">
-            <div className="relative" ref={dropdownRef}>
+            </nav>
+          </div>
+
+          {/* Right side - Dark mode toggle and User dropdown */}
+          <div className="flex items-center">
+            {/* Dark Mode Toggle */}
+            <DarkModeToggle />
+
+            {/* User dropdown */}
+            <div className="ml-4 relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                className="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                className="flex items-center text-sm font-medium text-gray-700 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none"
               >
-                {/* Avatar */}
-                <div className="w-8 h-8 rounded-full overflow-hidden bg-purple-100 flex items-center justify-center">
+                <div className="h-8 w-8 rounded-full bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center text-white mr-2">
                   {userData?.avatar ? (
                     <img
                       src={userData.avatar}
                       alt="Avatar"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover rounded-full"
                     />
                   ) : (
-                    <span className="text-sm font-medium text-purple-600">
+                    <span className="text-sm font-medium">
                       {getAvatarInitials()}
                     </span>
                   )}
                 </div>
-                
-                {/* Name */}
-                <div className="flex items-center space-x-1">
-                  <span className="text-sm font-medium text-gray-900">
-                    {loading ? 'Loading...' : getDisplayName()}
-                  </span>
-                  <ChevronDown className="w-4 h-4 text-gray-500" />
-                </div>
+                <span className="hidden md:block">
+                  {loading ? "Loading..." : getDisplayName()}
+                </span>
+                <ChevronDown className="ml-1 h-4 w-4" />
               </button>
 
               {/* Dropdown menu */}
               {isUserDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-                  <div className="py-1">
-                    {/* User info section */}
-                    <div className="px-4 py-3 border-b border-gray-200">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-full overflow-hidden bg-purple-100 flex items-center justify-center">
-                          {userData?.avatar ? (
-                            <img
-                              src={userData.avatar}
-                              alt="Avatar"
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <span className="text-sm font-medium text-purple-600">
-                              {getAvatarInitials()}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
-                            {getDisplayName()}
-                          </p>
-                          <p className="text-sm text-gray-500 truncate">
-                            {userData?.email || 'teacher@example.com'}
-                          </p>
-                          <p className="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded-full inline-block mt-1">
-                            {userData?.user_type === 'teacher' ? 'Giáo viên' : userData?.user_type || 'Teacher'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Dropdown items */}
-                    {userDropdownItems.map((item) => {
-                      const Icon = item.icon;
-                      return (
-                        <Link
-                          key={item.name}
-                          to={item.href}
-                          onClick={() => setIsUserDropdownOpen(false)}
-                          className="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                        >
-                          <Icon className="w-4 h-4 mr-3 text-gray-400 group-hover:text-gray-500" />
-                          {item.name}
-                        </Link>
-                      );
-                    })}
-
-                    {/* Logout */}
-                    <div className="border-t border-gray-200">
-                      <button
-                        onClick={() => {
-                          setIsUserDropdownOpen(false);
-                          handleLogout();
-                        }}
-                        className="group flex items-center w-full px-4 py-2 text-sm text-red-700 hover:bg-red-50 hover:text-red-900"
-                      >
-                        <LogOut className="w-4 h-4 mr-3 text-red-400 group-hover:text-red-500" />
-                        Đăng xuất
-                      </button>
-                    </div>
-                  </div>
+                <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-40">
+                  <Link
+                    to="/profile"
+                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    onClick={() => setIsUserDropdownOpen(false)}
+                  >
+                    Hồ sơ cá nhân
+                  </Link>
+                  <Link
+                    to="/change-password"
+                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    onClick={() => setIsUserDropdownOpen(false)}
+                  >
+                    Đổi mật khẩu
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setIsUserDropdownOpen(false);
+                      handleLogout();
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    Đăng xuất
+                  </button>
                 </div>
               )}
             </div>
-          </div>
 
-          {/* Mobile menu button */}
-          <div className="sm:hidden flex items-center">
+            {/* Mobile menu button */}
             <button
+              className="ml-2 md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500"
             >
               {isMobileMenuOpen ? (
                 <X className="block h-6 w-6" />
@@ -259,38 +215,12 @@ const TeacherNavigation = () => {
             </button>
           </div>
         </div>
-      </div>      {/* Mobile menu */}
+      </div>{" "}
+      {/* Mobile menu */}
       {isMobileMenuOpen && (
-        <div className="sm:hidden">
-          <div className="pt-2 pb-3 space-y-1">
-            {/* User info in mobile */}
-            <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-full overflow-hidden bg-purple-100 flex items-center justify-center">
-                  {userData?.avatar ? (
-                    <img
-                      src={userData.avatar}
-                      alt="Avatar"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-sm font-medium text-purple-600">
-                      {getAvatarInitials()}
-                    </span>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {loading ? 'Loading...' : getDisplayName()}
-                  </p>
-                  <p className="text-xs text-purple-600">
-                    {userData?.user_type === 'teacher' ? 'Giáo viên' : userData?.user_type || 'Teacher'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Main navigation items */}
+        <div className="md:hidden pt-2 pb-3 border-t border-gray-200 dark:border-gray-700">
+          <div className="px-2 space-y-1">
+            {/* Navigation items */}
             {navigationItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -298,55 +228,73 @@ const TeacherNavigation = () => {
                   key={item.name}
                   to={item.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
+                  className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${
                     isActive(item.href)
-                      ? 'bg-purple-50 border-purple-500 text-purple-700'
-                      : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
+                      ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/50"
+                      : "text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700"
                   }`}
                 >
-                  <div className="flex items-center">
-                    <Icon className="w-4 h-4 mr-3" />
-                    {item.name}
-                  </div>
+                  <Icon className="w-4 h-4 mr-3" />
+                  {item.name}
                 </Link>
               );
             })}
 
-            {/* User dropdown items in mobile */}
-            {userDropdownItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
-                    isActive(item.href)
-                      ? 'bg-purple-50 border-purple-500 text-purple-700'
-                      : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
-                  }`}
-                >
-                  <div className="flex items-center">
-                    <Icon className="w-4 h-4 mr-3" />
-                    {item.name}
+            {/* User menu items */}
+            <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex items-center px-3 pb-3">
+                <div className="h-8 w-8 rounded-full bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center text-white">
+                  {userData?.avatar ? (
+                    <img
+                      src={userData.avatar}
+                      alt="Avatar"
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <span className="text-sm font-medium">
+                      {getAvatarInitials()}
+                    </span>
+                  )}
+                </div>
+                <div className="ml-3">
+                  <div className="text-base font-medium text-gray-800 dark:text-white">
+                    {loading ? "Loading..." : getDisplayName()}
                   </div>
-                </Link>
-              );
-            })}
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    {userData?.email || "teacher@example.com"}
+                  </div>
+                </div>
+              </div>
 
-            {/* Logout in mobile */}
-            <button
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                handleLogout();
-              }}
-              className="block w-full text-left pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-red-600 hover:bg-red-50 hover:border-red-300"
-            >
-              <div className="flex items-center">
+              <Link
+                to="/profile"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                <User className="w-4 h-4 mr-3" />
+                Hồ sơ cá nhân
+              </Link>
+
+              <Link
+                to="/change-password"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                <Settings className="w-4 h-4 mr-3" />
+                Đổi mật khẩu
+              </Link>
+
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  handleLogout();
+                }}
+                className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
                 <LogOut className="w-4 h-4 mr-3" />
                 Đăng xuất
-              </div>
-            </button>
+              </button>
+            </div>
           </div>
         </div>
       )}
