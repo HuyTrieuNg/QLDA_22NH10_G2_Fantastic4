@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { Search, BookOpen, Users } from "lucide-react";
 import studentService from "../../services/studentService";
@@ -11,9 +11,20 @@ const CourseList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [activeCategory, setActiveCategory] = useState("");
+  const location = useLocation();
+
+  // Lấy category từ query string nếu có
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const cat = params.get("category") || "";
+    setSelectedCategory(cat);
+    console.log;
+    setActiveCategory(cat);
+  }, [location.search]);
 
   useEffect(() => {
     fetchCourses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategory]);
 
   const fetchCourses = async () => {
@@ -49,11 +60,6 @@ const CourseList = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleCategoryChange = (e) => {
-    setSelectedCategory(e.target.value);
-    setActiveCategory(e.target.value);
   };
 
   const handleCategoryButton = (cat) => {

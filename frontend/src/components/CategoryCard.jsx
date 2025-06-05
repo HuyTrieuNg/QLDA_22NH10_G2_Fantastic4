@@ -1,22 +1,30 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-const CategoryCard = ({ name, icon }) => (
-  <Link
-    to={
-      name === "Tất cả"
-        ? "/student/courses"
-        : `/student/courses?category=${encodeURIComponent(name)}`
+const CategoryCard = ({ name, icon, onClick }) => {
+  const navigate = useNavigate();
+  const handleClick = () => {
+    if (onClick) {
+      onClick(name);
+    } else {
+      // Default: chuyển hướng sang trang course list với query string
+      navigate(`/student/courses?category=${encodeURIComponent(name)}`);
     }
-    className="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg text-center hover:shadow-md hover:bg-indigo-50 dark:hover:bg-gray-600 transition-all duration-300 transform hover:-translate-y-1"
-  >
-    <div className="text-indigo-600 dark:text-indigo-400 flex justify-center mb-4">
-      {icon}
-    </div>
-    <h3 className="font-medium text-gray-900 dark:text-white truncate">
-      {name}
-    </h3>
-  </Link>
-);
+  };
+  return (
+    <button
+      onClick={handleClick}
+      className="bg-gray-200 dark:bg-gray-700 p-6 rounded-lg text-center hover:shadow-lg hover:bg-gray-300 dark:hover:bg-indigo-800 transition-all duration-300 transform hover:-translate-y-1 shadow w-full"
+      type="button"
+    >
+      <div className="text-indigo-700 dark:text-indigo-200 flex justify-center mb-4 text-3xl">
+        {icon}
+      </div>
+      <h3 className="font-semibold text-gray-800 dark:text-white truncate text-base">
+        {name}
+      </h3>
+    </button>
+  );
+};
 
 export default CategoryCard;

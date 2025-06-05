@@ -1,11 +1,11 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
-import StudentHeader from "./StudentHeader";
+import MainHeader from "../common/MainHeader";
 
 const StudentLayout = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-      <StudentHeader />
+      <MainHeader />
       <main className="flex-1 container mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <Outlet />
       </main>
