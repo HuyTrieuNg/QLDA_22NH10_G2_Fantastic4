@@ -214,40 +214,40 @@ const CreateEditQuiz = ({ isEdit = false }) => {
       setSaving(false);
     }
   };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
   return (
     <TeacherLayout>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="flex items-center mb-8">
-        <button
-          onClick={() => navigate(-1)}
-          className="mr-4 p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            {isEdit ? 'Chỉnh sửa bài kiểm tra' : 'Tạo bài kiểm tra mới'}
-          </h1>
-          {section && (
-            <p className="mt-2 text-gray-600">
-              Chương: {section.title}
-            </p>
-          )}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-700 via-purple-600 to-purple-800 rounded-2xl shadow-2xl p-8 mb-10">
+        <div className="flex items-center">
+          <button
+            onClick={() => navigate(-1)}
+            className="mr-4 p-2 text-white hover:bg-white/20 rounded-lg transition-all duration-200"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold text-white flex items-center">
+              <HelpCircle className="w-8 h-8 mr-3" />
+              {isEdit ? 'Chỉnh sửa bài kiểm tra' : 'Tạo bài kiểm tra mới'}
+            </h1>
+            {section && (
+              <p className="mt-2 text-blue-100">
+                Chương: {section.title}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Quiz Info */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+      <form onSubmit={handleSubmit} className="space-y-8">        {/* Quiz Info */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-10">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Thông tin bài kiểm tra</h2>
             <div className="grid grid-cols-1 gap-6">
             <div>
@@ -261,21 +261,22 @@ const CreateEditQuiz = ({ isEdit = false }) => {
                 value={formData.title}
                 onChange={handleInputChange}
                 placeholder="Ví dụ: Kiểm tra kiến thức Python cơ bản"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
             </div>
           </div>
-        </div>
-
-        {/* Questions */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        </div>        {/* Questions */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-10">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Câu hỏi</h2>
+            <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+              <HelpCircle className="w-6 h-6 mr-2 text-blue-600" />
+              Câu hỏi
+            </h2>
             <button
               type="button"
               onClick={addQuestion}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold text-lg shadow-lg hover:from-blue-700 hover:to-purple-700 hover:scale-105 transition-all duration-200"
             >
               <Plus className="w-4 h-4 mr-2" />
               Thêm câu hỏi
@@ -288,11 +289,10 @@ const CreateEditQuiz = ({ isEdit = false }) => {
               <h3 className="mt-2 text-sm font-medium text-gray-900">Chưa có câu hỏi nào</h3>
               <p className="mt-1 text-sm text-gray-500">
                 Bắt đầu bằng cách thêm câu hỏi đầu tiên
-              </p>
-              <button
+              </p>              <button
                 type="button"
                 onClick={addQuestion}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="mt-4 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold text-lg shadow-lg hover:from-blue-700 hover:to-purple-700 hover:scale-105 transition-all duration-200"
               >
                 <Plus className="w-4 h-4 mr-2 inline" />
                 Thêm câu hỏi
@@ -301,7 +301,7 @@ const CreateEditQuiz = ({ isEdit = false }) => {
           ) : (
             <div className="space-y-6">
               {questions.map((question, questionIndex) => (
-                <div key={question.id} className="border border-gray-200 rounded-lg p-6">
+                <div key={question.id} className="border border-gray-200 rounded-2xl p-6 bg-gradient-to-r from-gray-50 to-blue-50 hover:from-blue-50 hover:to-purple-50 transition-all duration-200">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-medium text-gray-900">
                       Câu hỏi {questionIndex + 1}
@@ -325,7 +325,7 @@ const CreateEditQuiz = ({ isEdit = false }) => {
                       onChange={(e) => updateQuestion(question.id, 'text', e.target.value)}
                       rows={2}
                       placeholder="Nhập nội dung câu hỏi..."
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       required
                     />
                   </div>
@@ -350,7 +350,7 @@ const CreateEditQuiz = ({ isEdit = false }) => {
                             value={choice.text}
                             onChange={(e) => updateChoice(question.id, choice.id, 'text', e.target.value)}
                             placeholder={`Lựa chọn ${choiceIndex + 1}`}
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           />
                         </div>
                       ))}
@@ -365,9 +365,9 @@ const CreateEditQuiz = ({ isEdit = false }) => {
                 <button
                   type="button"
                   onClick={addQuestion}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold text-lg shadow-lg hover:from-blue-700 hover:to-purple-700 hover:scale-105 transition-all duration-200"
                 >
-                  <Plus className="w-4 h-4 mr-2" />
+                  <Plus className="w-4 h-4 mr-2 inline" />
                   Thêm câu hỏi
                 </button>
               </div>
@@ -377,10 +377,10 @@ const CreateEditQuiz = ({ isEdit = false }) => {
 
         {/* Preview */}
         {questions.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-2xl shadow-xl p-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Xem trước</h2>
             
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+            <div className="border-2 border-dashed border-gray-300 rounded-2xl p-6">
               <div className="flex items-center mb-4">
                 <HelpCircle className="w-6 h-6 text-blue-600 mr-2" />
                 <h3 className="text-lg font-medium text-gray-900">
@@ -390,7 +390,7 @@ const CreateEditQuiz = ({ isEdit = false }) => {
               
               <div className="space-y-4">
                 {questions.map((question, index) => (
-                  <div key={question.id} className="bg-gray-50 rounded-lg p-4">
+                  <div key={question.id} className="bg-gray-50 rounded-2xl p-4">
                     <h4 className="font-medium text-gray-900 mb-2">
                       {index + 1}. {question.text || `Câu hỏi ${index + 1}`}
                     </h4>
@@ -423,15 +423,14 @@ const CreateEditQuiz = ({ isEdit = false }) => {
             type="button"
             onClick={() => navigate(-1)}
             disabled={saving}
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Hủy
           </button>
-          
-          <button
+            <button
             type="submit"
             disabled={saving || !formData.title.trim() || questions.length === 0}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold text-lg shadow-lg hover:from-blue-700 hover:to-purple-700 hover:scale-105 transition-all duration-200 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? (
               <div className="flex items-center">

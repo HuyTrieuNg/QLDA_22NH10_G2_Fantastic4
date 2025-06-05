@@ -85,6 +85,14 @@ export const quizService = {
   generateAutoQuiz: (sectionId, data) => api.post(`/sections/${sectionId}/generate-quiz/`, data, {
     timeout: 300000, // 5 phút timeout cho AI quiz generation
   }),
+  
+  // Get quiz results for teachers
+  getQuizResults: (quizId) => api.get(`/teacher/quizzes/${quizId}/results/`),
 };
+
+// Thống kê cho giáo viên (chỉ số liệu, không AI)
+export const getTeacherStatistics = () => api.get('/teacher/statistics/', { timeout: 20000 }); // 20s cho số liệu
+// Lấy nhận xét AI cho thống kê giáo viên (timeout lớn)
+export const getTeacherStatisticsAIFeedback = () => api.get('/teacher/statistics/?ai=1', { timeout: 180000 }); // 3 phút cho AI
 
 export default api;

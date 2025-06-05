@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Eye } from 'lucide-react';
 import { courseService } from '../../services/courseService';
+import { categories } from '../../constants/categories';
 import toast from 'react-hot-toast';
 import TeacherLayout from '../common/TeacherLayout';
 
@@ -18,19 +19,6 @@ const EditCourse = () => {
     price: '',
     published: false
   });
-
-  const categories = [
-    'Programming',
-    'Design',
-    'Business',
-    'Marketing',
-    'Photography',
-    'Music',
-    'Health & Fitness',
-    'Language',
-    'Lifestyle',
-    'Personal Development'
-  ];
 
   useEffect(() => {
     fetchCourse();
@@ -123,7 +111,7 @@ const EditCourse = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-2xl shadow-xl p-8 mb-10">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">Thông tin cơ bản</h2>
             <div className="text-sm text-gray-500 bg-blue-50 px-3 py-1 rounded-lg">
@@ -143,7 +131,7 @@ const EditCourse = () => {
               value={formData.title}
               onChange={handleInputChange}
               placeholder="Ví dụ: Lập trình Python từ cơ bản đến nâng cao"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-5 py-3 border border-gray-300 rounded-xl focus:ring-blue-500"
               required
             />
             <p className="mt-1 text-sm text-gray-500">
@@ -163,7 +151,7 @@ const EditCourse = () => {
               value={formData.subtitle}
               onChange={handleInputChange}
               placeholder="Mô tả ngắn gọn về khóa học"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-5 py-3 border border-gray-300 rounded-xl focus:ring-blue-500"
             />
           </div>
 
@@ -179,7 +167,7 @@ const EditCourse = () => {
               onChange={handleInputChange}
               rows={6}
               placeholder="Mô tả chi tiết về nội dung, mục tiêu học tập và đối tượng học viên..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+              className="w-full px-5 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 resize-none"
               required
             />
             <p className="mt-1 text-sm text-gray-500">
@@ -198,7 +186,7 @@ const EditCourse = () => {
                 name="category"
                 value={formData.category}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-5 py-3 border border-gray-300 rounded-xl focus:ring-blue-500"
               >
                 <option value="">Chọn danh mục</option>
                 {categories.map(category => (
@@ -219,7 +207,7 @@ const EditCourse = () => {
                 onChange={handleInputChange}
                 min="0"                step="0.01"
                 placeholder="11.99"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-5 py-3 border border-gray-300 rounded-xl focus:ring-blue-500"
               />
             </div>
           </div>
@@ -246,10 +234,10 @@ const EditCourse = () => {
         </div>
 
         {/* Course Content Preview */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-2xl shadow-xl p-8 mb-10">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Xem trước</h2>
           
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+          <div className="border-2 border-dashed border-gray-300 rounded-2xl p-8">
             <div className="text-center">
               <Eye className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">
@@ -258,7 +246,7 @@ const EditCourse = () => {
               <p className="mt-1 text-sm text-gray-500">
                 {formData.subtitle || 'Phụ đề khóa học'}
               </p>
-              <div className="mt-4 text-left bg-gray-50 rounded-lg p-4">
+              <div className="mt-4 text-left bg-gray-50 rounded-2xl p-4">
                 <p className="text-sm text-gray-600">
                   {formData.description || 'Mô tả khóa học sẽ hiển thị ở đây...'}
                 </p>
@@ -293,7 +281,7 @@ const EditCourse = () => {
             type="button"
             onClick={() => navigate(`/teacher/courses/${id}`)}
             disabled={saving}
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Hủy
           </button>
@@ -301,7 +289,7 @@ const EditCourse = () => {
           <button
             type="submit"
             disabled={saving || !formData.title.trim() || !formData.description.trim()}
-            className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold text-lg shadow-lg hover:from-blue-700 hover:to-purple-700 hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? (
               <div className="flex items-center">

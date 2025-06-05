@@ -127,7 +127,7 @@ const CreateEditSection = ({ isEdit = false }) => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-10">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Thông tin chương</h2>
           
           {/* Section Title */}
@@ -142,7 +142,7 @@ const CreateEditSection = ({ isEdit = false }) => {
               value={formData.title}
               onChange={handleInputChange}
               placeholder="Ví dụ: Giới thiệu về Python"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full rounded-xl border-gray-300 focus:ring-blue-500 text-lg px-5 py-3"
               required
             />
           </div>
@@ -159,7 +159,7 @@ const CreateEditSection = ({ isEdit = false }) => {
               onChange={handleInputChange}
               rows={4}
               placeholder="Mô tả ngắn gọn về nội dung của chương này..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+              className="w-full rounded-xl border-gray-300 focus:ring-blue-500 text-lg px-5 py-3 resize-none"
             />
             <p className="mt-1 text-sm text-gray-500">
               Mô tả sẽ giúp học sinh hiểu rõ hơn về nội dung chương học
@@ -178,7 +178,7 @@ const CreateEditSection = ({ isEdit = false }) => {
               value={formData.position}
               onChange={handleInputChange}
               min="1"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full rounded-xl border-gray-300 focus:ring-blue-500 text-lg px-5 py-3"
             />
             <p className="mt-1 text-sm text-gray-500">
               Thứ tự hiển thị của chương trong khóa học
@@ -187,7 +187,7 @@ const CreateEditSection = ({ isEdit = false }) => {
         </div>
 
         {/* Preview */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-10">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Xem trước</h2>
           
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
@@ -218,7 +218,7 @@ const CreateEditSection = ({ isEdit = false }) => {
             type="button"
             onClick={() => navigate(-1)}
             disabled={saving}
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Hủy
           </button>
@@ -226,7 +226,7 @@ const CreateEditSection = ({ isEdit = false }) => {
           <button
             type="submit"
             disabled={saving || !formData.title.trim()}
-            className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold text-lg shadow-lg hover:from-blue-700 hover:to-purple-700 hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? (
               <div className="flex items-center">

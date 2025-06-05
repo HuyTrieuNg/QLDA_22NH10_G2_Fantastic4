@@ -191,3 +191,46 @@ def generate_quiz_from_selected_lessons(lesson_ids, num_questions=10):
     except Exception as e:
         logger.error(f"Error generating quiz from selected lessons: {str(e)}")
         return []
+
+def summarize_content_with_ai(content):
+    """Summarize content using Google Gemini AI"""
+    try:
+        client = genai.Client(api_key=getattr(settings, 'GOOGLE_AI_API_KEY', ''))
+        prompt = f"""
+            Bạn là một trợ lý AI. Hãy đọc kỹ phần nội dung sau và tóm tắt thành danh sách các ý chính ngắn gọn, dễ hiểu. Mỗi ý nên thể hiện một điểm quan trọng. 
+
+            Yêu cầu:
+            - Viết mỗi ý trên một dòng, dạng dấu gạch đầu dòng (-).
+            - Tối đa 100 ý chính.
+            - Không viết lại toàn văn, chỉ nêu thông tin cốt lõi.
+            - Nếu nội dung là tiếng Việt, hãy giữ tiếng Việt.
+            - Nếu nội dung là tiếng Anh, hãy giữ tiếng Anh.
+
+            Dưới đây là nội dung cần tóm tắt:
+            \"\"\"
+            {content[:10000]}
+            \"\"\"
+        """
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt,
+        )
+        response_text = response.text.strip()
+        return response_text
+    except Exception as e:
+        logger.error(f"Error summarizing content with AI: {str(e)}")
+        return None
+
+def generate_quiz_feedback_with_ai(prompt):
+    """Sinh nhận xét AI cho kết quả quiz với prompt tự do (không ép dạng tóm tắt)"""
+    try:
+        client = genai.Client(api_key=getattr(settings, 'GOOGLE_AI_API_KEY', ''))
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt,
+        )
+        response_text = response.text.strip()
+        return response_text
+    except Exception as e:
+        logger.error(f"Error generating quiz feedback with AI: {str(e)}")
+        return None

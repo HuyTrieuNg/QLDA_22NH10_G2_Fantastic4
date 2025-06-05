@@ -41,4 +41,9 @@ urlpatterns = [
     # Dashboard URLs
     path('dashboard/teacher/', views.TeacherDashboardView.as_view(), name='teacher-dashboard'),
     path('dashboard/admin/', views.AdminDashboardView.as_view(), name='admin-dashboard'),
+      # Teacher Quiz Results
+    path('teacher/quizzes/<int:quiz_id>/results/', views.teacher_quiz_results, name='teacher-quiz-results'),
+    path('teacher/quiz-attempts/<int:attempt_id>/detail/', views.teacher_quiz_attempt_detail, name='teacher-quiz-attempt-detail'),
+    path('teacher/quiz-attempts/<int:attempt_id>/ai-feedback/', views.teacher_quiz_attempt_ai_feedback, name='teacher-quiz-attempt-ai-feedback'),
+    path('teacher/statistics/', views.teacher_statistics, name='teacher-statistics'),
 ]

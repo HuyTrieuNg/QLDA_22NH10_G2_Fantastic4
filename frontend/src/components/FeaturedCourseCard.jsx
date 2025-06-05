@@ -29,7 +29,7 @@ const FeaturedCourseCard = ({ course }) => (
       </h3>
       <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
         Giảng viên:{" "}
-        {course.teacher_name || course.instructor || "Đội ngũ giảng viên"}
+        {course?.creator?.name || course.creator || "Đội ngũ giảng viên"}
       </p>
       <div className="flex items-center mb-4">
         <div className="flex text-yellow-400">
@@ -55,7 +55,7 @@ const FeaturedCourseCard = ({ course }) => (
       </div>
       <div className="flex items-center justify-between">
         <span className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
-          {course.price ? `${course.price}đ` : "Miễn phí"}
+          {course.price ? `${course.price}` : "Miễn phí"}
         </span>
         <span className="px-2 py-1 bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200 text-xs font-medium rounded">
           {course.level || "Cơ bản"}

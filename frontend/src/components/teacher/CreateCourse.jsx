@@ -4,6 +4,7 @@ import { ArrowLeft, Save, Eye } from 'lucide-react';
 import { courseService } from '../../services/courseService';
 import toast from 'react-hot-toast';
 import TeacherLayout from '../common/TeacherLayout';
+import { categories } from '../../constants/categories';
 
 const CreateCourse = () => {
   const navigate = useNavigate();
@@ -18,18 +19,7 @@ const CreateCourse = () => {
     published: false
   });
 
-  const categories = [
-    'Programming',
-    'Design',
-    'Business',
-    'Marketing',
-    'Photography',
-    'Music',
-    'Health & Fitness',
-    'Language',
-    'Lifestyle',
-    'Personal Development'
-  ];
+
   const validateForm = () => {
     const errors = {};
 
@@ -123,7 +113,7 @@ const CreateCourse = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-10">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Thông tin cơ bản</h2>
             {/* Course Title */}
           <div className="mb-6">
@@ -270,7 +260,7 @@ const CreateCourse = () => {
         </div>
 
         {/* Course Content Preview */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-10">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Xem trước</h2>
           
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
@@ -307,7 +297,7 @@ const CreateCourse = () => {
             type="button"
             onClick={() => navigate('/teacher/courses')}
             disabled={loading}
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Hủy
           </button>
@@ -315,7 +305,7 @@ const CreateCourse = () => {
           <button
             type="submit"
             disabled={loading || !formData.title.trim() || !formData.description.trim()}
-            className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold text-lg shadow-lg hover:from-blue-700 hover:to-purple-700 hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <div className="flex items-center">

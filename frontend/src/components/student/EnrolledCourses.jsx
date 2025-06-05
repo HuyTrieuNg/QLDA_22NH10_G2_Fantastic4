@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { BookOpen, CheckCircle, Clock } from "lucide-react";
-import { studentService } from "../../services/studentService";
+import studentService from "../../services/studentService";
+import { categories } from "../../constants/categories";
 
 const EnrolledCourses = () => {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
@@ -74,7 +75,11 @@ const EnrolledCourses = () => {
                   <div className="aspect-video w-full overflow-hidden bg-gray-200 dark:bg-slate-700">
                     {enrollment.course.thumbnail ? (
                       <img
-                        src={`http://localhost:8000${enrollment.course.thumbnail}`}
+                        src={
+                          enrollment.course.thumbnail.startsWith("http")
+                            ? enrollment.course.thumbnail
+                            : `http://localhost:8000${enrollment.course.thumbnail}`
+                        }
                         alt={enrollment.course.title}
                         className="w-full h-full object-cover"
                       />
@@ -113,25 +118,44 @@ const EnrolledCourses = () => {
                       <BookOpen size={16} className="mr-2" />
                       <span>{enrollment.course.lesson_count} bài học</span>
                     </div>
+                    {typeof enrollment.course.quiz_count === "number" && (
+                      <div className="flex items-center">
+                        <CheckCircle size={16} className="mr-2" />
+                        <span>{enrollment.course.quiz_count} bài kiểm tra</span>
+                      </div>
+                    )}
                     <div className="flex items-center">
                       <Clock size={16} className="mr-2" />
                       <span>Đăng ký: {formatDate(enrollment.enrolled_at)}</span>
                     </div>
                   </div>
 
+                  {/* Progress calculation: lessons + quizzes */}
                   <div className="mt-6">
                     <div className="flex justify-between mb-1">
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                         Tiến độ học tập
                       </span>
                       <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
-                        {Math.round(enrollment.progress)}%
+                        {(() => {
+                          const lessonCount =
+                            enrollment.course.lesson_count || 0;
+                          const quizCount =
+                            typeof enrollment.course.quiz_count === "number"
+                              ? enrollment.course.quiz_count
+                              : 0;
+                          const total = lessonCount + quizCount;
+                          // If backend progress is already correct, just show it. Otherwise, fallback to old logic.
+                          return total > 0
+                            ? `${Math.round(enrollment.progress)}%`
+                            : `${Math.round(enrollment.progress)}%`;
+                        })()}
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
                       <div
                         className="bg-indigo-600 h-2.5 rounded-full"
-                        style={{ width: `${enrollment.progress}%` }}
+                        style={{ width: `${Math.round(enrollment.progress)}%` }}
                       ></div>
                     </div>
                   </div>
