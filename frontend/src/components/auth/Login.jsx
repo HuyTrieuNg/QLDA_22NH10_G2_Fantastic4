@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { login } from "../../services/authService";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +11,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { refreshAuthStatus } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,11 +41,13 @@ const Login = () => {
       }
 
       localStorage.setItem("accessToken", response.data.access);
-      localStorage.setItem("refreshToken", response.data.refresh);
-
-      // Lưu user_type vào localStorage (dùng key userType)
+      localStorage.setItem("refreshToken", response.data.refresh); // Lưu user_type vào localStorage (dùng key userType)
       if (response.data.user_type) {
         localStorage.setItem("userType", response.data.user_type);
+
+        // Refresh auth status to update AuthContext
+        await refreshAuthStatus();
+
         // Điều hướng theo vai trò
         const userType = response.data.user_type;
         if (userType === "admin") {

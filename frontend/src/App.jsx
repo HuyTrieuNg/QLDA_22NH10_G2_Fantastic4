@@ -28,6 +28,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 
 // Teacher components
+import TeacherRoute from "./components/teacher/TeacherRoute";
 import TeacherDashboard from "./components/teacher/TeacherDashboard";
 import TeacherCourses from "./components/teacher/TeacherCourses";
 import CreateCourse from "./components/teacher/CreateCourse";
@@ -43,6 +44,7 @@ import TeacherQuizAttemptDetail from "./components/teacher/TeacherQuizAttemptDet
 import TeacherStatistics from "./components/teacher/TeacherStatistics";
 
 // Student components
+import StudentRoute from "./components/student/StudentRoute";
 import StudentLayout from "./components/student/StudentLayout";
 import CourseList from "./components/student/CourseList";
 import StudentCourseDetail from "./components/student/CourseDetail";
@@ -73,97 +75,112 @@ function App() {
                 <Route path="/change-password" element={<ChangePassword />} />
 
                 {/* Teacher Routes */}
-                <Route
-                  path="/teacher"
-                  element={<Navigate to="/teacher/dashboard" replace />}
-                />
-                <Route
-                  path="/teacher/dashboard"
-                  element={<TeacherDashboard />}
-                />
-                <Route path="/teacher/courses" element={<TeacherCourses />} />
-                <Route
-                  path="/teacher/courses/create"
-                  element={<CreateCourse />}
-                />
-                <Route path="/teacher/courses/:id" element={<CourseDetail />} />
-                <Route
-                  path="/teacher/courses/:id/edit"
-                  element={<EditCourse />}
-                />
-                <Route
-                  path="/teacher/courses/:id/students"
-                  element={<CourseStudents />}
-                />
-                {/* Section Content Routes */}
-                <Route
-                  path="/teacher/courses/:id/sections/create"
-                  element={<CreateEditSection isEdit={false} />}
-                />
-                <Route
-                  path="/teacher/sections/:sectionId/edit"
-                  element={<CreateEditSection isEdit={true} />}
-                />
-                <Route
-                  path="/teacher/sections/:sectionId/lessons/create"
-                  element={<CreateEditLesson isEdit={false} />}
-                />
-                <Route
-                  path="/teacher/sections/:sectionId/lessons/:lessonId/edit"
-                  element={<CreateEditLesson isEdit={true} />}
-                />
-                <Route
-                  path="/teacher/sections/:sectionId/quizzes/create"
-                  element={<CreateEditQuiz isEdit={false} />}
-                />
-                <Route
-                  path="/teacher/sections/:sectionId/quizzes/:quizId/edit"
-                  element={<CreateEditQuiz isEdit={true} />}
-                />
-                <Route
-                  path="/teacher/sections/:sectionId/generate-quiz"
-                  element={<AutoQuizGeneration />}
-                />
-                <Route
-                  path="/teacher/sections/:sectionId/quizzes/:quizId/results"
-                  element={<QuizResults />}
-                />
-                <Route
-                  path="/teacher/quiz-attempts/:attemptId/detail"
-                  element={<TeacherQuizAttemptDetail />}
-                />
-                <Route
-                  path="/teacher/sections/:sectionId/quizzes/:quizId/attempts"
-                  element={<TeacherQuizAttemptDetail />}
-                />
-                <Route
-                  path="/teacher/statistics"
-                  element={<TeacherStatistics />}
-                />
+                <Route element={<TeacherRoute />}>
+                  <Route
+                    path="/teacher"
+                    element={<Navigate to="/teacher/dashboard" replace />}
+                  />
+                  <Route
+                    path="/teacher/dashboard"
+                    element={<TeacherDashboard />}
+                  />
+                  <Route path="/teacher/courses" element={<TeacherCourses />} />
+                  <Route
+                    path="/teacher/courses/create"
+                    element={<CreateCourse />}
+                  />
+                  <Route
+                    path="/teacher/courses/:id"
+                    element={<CourseDetail />}
+                  />
+                  <Route
+                    path="/teacher/courses/:id/edit"
+                    element={<EditCourse />}
+                  />
+                  <Route
+                    path="/teacher/courses/:id/students"
+                    element={<CourseStudents />}
+                  />
+                  {/* Section Content Routes */}
+                  <Route
+                    path="/teacher/courses/:id/sections/create"
+                    element={<CreateEditSection isEdit={false} />}
+                  />
+                  <Route
+                    path="/teacher/sections/:sectionId/edit"
+                    element={<CreateEditSection isEdit={true} />}
+                  />
+                  <Route
+                    path="/teacher/sections/:sectionId/lessons/create"
+                    element={<CreateEditLesson isEdit={false} />}
+                  />
+                  <Route
+                    path="/teacher/sections/:sectionId/lessons/:lessonId/edit"
+                    element={<CreateEditLesson isEdit={true} />}
+                  />
+                  <Route
+                    path="/teacher/sections/:sectionId/quizzes/create"
+                    element={<CreateEditQuiz isEdit={false} />}
+                  />
+                  <Route
+                    path="/teacher/sections/:sectionId/quizzes/:quizId/edit"
+                    element={<CreateEditQuiz isEdit={true} />}
+                  />
+                  <Route
+                    path="/teacher/sections/:sectionId/generate-quiz"
+                    element={<AutoQuizGeneration />}
+                  />
+                  <Route
+                    path="/teacher/sections/:sectionId/quizzes/:quizId/results"
+                    element={<QuizResults />}
+                  />
+                  <Route
+                    path="/teacher/quiz-attempts/:attemptId/detail"
+                    element={<TeacherQuizAttemptDetail />}
+                  />
+                  <Route
+                    path="/teacher/sections/:sectionId/quizzes/:quizId/attempts"
+                    element={<TeacherQuizAttemptDetail />}
+                  />
+                  <Route
+                    path="/teacher/statistics"
+                    element={<TeacherStatistics />}
+                  />
+                </Route>
               </Route>
 
               {/* Student Routes */}
-              <Route path="/student" element={<StudentLayout />}>
-                <Route
-                  index
-                  element={<Navigate to="/student/courses" replace />}
-                />
-                <Route path="courses" element={<CourseList />} />
-                <Route
-                  path="courses/:courseId"
-                  element={<StudentCourseDetail />}
-                />
-                <Route path="my-courses" element={<EnrolledCourses />} />
-                <Route path="lessons/:lessonId" element={<LessonDetail />} />
-                <Route path="quizzes/:quizId" element={<StudentQuizPage />} />
-                <Route
-                  path="quizzes/:quizId/history"
-                  element={<StudentQuizHistoryPage />}
-                />
-                <Route
-                  path="quiz-history"
-                  element={<StudentAllQuizHistoryPage />}
-                />
+              <Route element={<ProtectedRoute />}>
+                <Route element={<StudentRoute />}>
+                  <Route path="/student" element={<StudentLayout />}>
+                    <Route
+                      index
+                      element={<Navigate to="/student/courses" replace />}
+                    />
+                    <Route path="courses" element={<CourseList />} />
+                    <Route
+                      path="courses/:courseId"
+                      element={<StudentCourseDetail />}
+                    />
+                    <Route path="my-courses" element={<EnrolledCourses />} />
+                    <Route
+                      path="lessons/:lessonId"
+                      element={<LessonDetail />}
+                    />
+                    <Route
+                      path="quizzes/:quizId"
+                      element={<StudentQuizPage />}
+                    />
+                    <Route
+                      path="quizzes/:quizId/history"
+                      element={<StudentQuizHistoryPage />}
+                    />
+                    <Route
+                      path="quiz-history"
+                      element={<StudentAllQuizHistoryPage />}
+                    />
+                  </Route>
+                </Route>
               </Route>
 
               {/* Admin Routes */}
