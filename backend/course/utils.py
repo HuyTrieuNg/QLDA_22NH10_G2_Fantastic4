@@ -197,18 +197,18 @@ def summarize_content_with_ai(content):
     try:
         client = genai.Client(api_key=getattr(settings, 'GOOGLE_AI_API_KEY', ''))
         prompt = f"""
-            Bạn là một trợ lý AI. Hãy đọc kỹ phần nội dung sau và tóm tắt thành danh sách các ý chính ngắn gọn, dễ hiểu. Mỗi ý nên thể hiện một điểm quan trọng. 
-
+            Bạn là một trợ lý AI. Lọc lấy nội dung bài giảng và tóm tắt thành danh sách các ý chính ngắn gọn, dễ hiểu.
             Yêu cầu:
+            - Các ý ghi chú cần nhớ.
             - Viết mỗi ý trên một dòng, dạng dấu gạch đầu dòng (-).
-            - Tối đa 100 ý chính.
+            - Tối đa 20 ý chính.
             - Không viết lại toàn văn, chỉ nêu thông tin cốt lõi.
             - Nếu nội dung là tiếng Việt, hãy giữ tiếng Việt.
             - Nếu nội dung là tiếng Anh, hãy giữ tiếng Anh.
 
-            Dưới đây là nội dung cần tóm tắt:
+            Nội dung bao gồm bài giảng và phụ đề video:
             \"\"\"
-            {content[:10000]}
+            {content[:5000]}
             \"\"\"
         """
         response = client.models.generate_content(
@@ -218,6 +218,7 @@ def summarize_content_with_ai(content):
         response_text = response.text.strip()
         return response_text
     except Exception as e:
+        print(content)
         logger.error(f"Error summarizing content with AI: {str(e)}")
         return None
 

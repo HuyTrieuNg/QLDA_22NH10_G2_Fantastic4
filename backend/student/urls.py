@@ -18,11 +18,10 @@ urlpatterns = [
     path('my-courses/', views.StudentEnrolledCoursesView.as_view(), name='enrolled-courses'),
     
     # Xem bài giảng
-    path('lessons/<int:pk>/', views.StudentLessonDetailView.as_view(), name='lesson-detail'),
-
-    # Lịch sử làm bài quiz
+    path('lessons/<int:pk>/', views.StudentLessonDetailView.as_view(), name='lesson-detail'),    # Lịch sử làm bài quiz
     path('quiz-history/', views.StudentQuizHistoryListView.as_view(), name='quiz-history'),
     path('quizzes/<int:quiz_id>/history/', views.StudentQuizHistoryByQuizView.as_view(), name='quiz-history-by-quiz'),
+    path('quiz-attempts/<int:attempt_id>/', views.StudentQuizAttemptDetailView.as_view(), name='quiz-attempt-detail'),
 
     # Nộp bài kiểm tra
     path('quizzes/<int:quiz_id>/submit/', views.StudentQuizSubmitView.as_view(), name='quiz-submit'),

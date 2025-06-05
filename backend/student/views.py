@@ -154,7 +154,7 @@ class StudentQuizHistoryListView(generics.ListAPIView):
 
 class StudentQuizHistoryByQuizView(APIView):
     """
-    Lấy lịch sử làm bài mới nhất cho một quiz cụ thể của học viên hiện tại, trả về chi tiết giống submit
+    Lấy lịch sử làm bài mới nhất cho một quiz cụ thể của học viên hiện tại, trả về chi tiết với text thực tế
     """
     permission_classes = [IsAuthenticated]
 
@@ -171,15 +171,25 @@ class StudentQuizHistoryByQuizView(APIView):
         total = questions.count()
         for q in questions:
             qid = str(q.id)
-            selected = answers.get(qid)
+            selected_choice_id = answers.get(qid)
             correct_choice = q.choices.filter(is_correct=True).first()
-            is_correct = str(getattr(correct_choice, 'id', None)) == str(selected)
+            
+            # Get selected choice text
+            selected_choice_text = None
+            if selected_choice_id:
+                try:
+                    selected_choice = q.choices.get(id=selected_choice_id)
+                    selected_choice_text = selected_choice.text
+                except:
+                    selected_choice_text = "Không xác định"
+            
+            is_correct = str(getattr(correct_choice, 'id', None)) == str(selected_choice_id)
             if is_correct:
                 correct += 1
             answer_detail.append({
-                "question": q.text,
-                "your_choice": selected,
-                "correct_choice": str(getattr(correct_choice, 'id', None)),
+                "question": q.text,                "your_choice": selected_choice_text or "Không trả lời",
+                "correct_choice": correct_choice.text if correct_choice else "Không xác định",
+                "is_correct": is_correct
             })
         return Response({
             "score": attempt.score,
@@ -188,6 +198,55 @@ class StudentQuizHistoryByQuizView(APIView):
             "answers": answer_detail,
             "attempt_id": attempt.id,
             "submitted_at": attempt.submitted_at
+        })
+
+
+class StudentQuizAttemptDetailView(APIView):
+    """
+    Chi tiết bài làm quiz theo attempt ID (cho học sinh)
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, attempt_id):
+        attempt = get_object_or_404(QuizAttempt, id=attempt_id, user=request.user)
+        # Lấy quiz và questions
+        quiz = attempt.quiz
+        questions = quiz.questions.all()
+        answers = attempt.answers or {}
+        answer_detail = []
+        correct = 0
+        total = questions.count()
+        for q in questions:
+            qid = str(q.id)
+            selected_choice_id = answers.get(qid)
+            correct_choice = q.choices.filter(is_correct=True).first()
+            
+            # Get selected choice text
+            selected_choice_text = None
+            if selected_choice_id:
+                try:
+                    selected_choice = q.choices.get(id=selected_choice_id)
+                    selected_choice_text = selected_choice.text
+                except:
+                    selected_choice_text = "Không xác định"
+            
+            is_correct = str(getattr(correct_choice, 'id', None)) == str(selected_choice_id)
+            if is_correct:
+                correct += 1
+            answer_detail.append({
+                "question": q.text,
+                "your_choice": selected_choice_text or "Không trả lời",
+                "correct_choice": correct_choice.text if correct_choice else "Không xác định",
+                "is_correct": is_correct
+            })
+        return Response({
+            "score": attempt.score,
+            "correct": correct,
+            "total": total,
+            "answers": answer_detail,
+            "attempt_id": attempt.id,
+            "submitted_at": attempt.submitted_at,
+            "quiz_title": quiz.title
         })
 
 
@@ -209,15 +268,26 @@ class StudentQuizSubmitView(APIView):
         answer_detail = []
         for q in questions:
             qid = str(q.id)
-            selected = answers.get(qid)
+            selected_choice_id = answers.get(qid)
             correct_choice = q.choices.filter(is_correct=True).first()
-            is_correct = str(getattr(correct_choice, 'id', None)) == str(selected)
+            
+            # Get selected choice text
+            selected_choice_text = None
+            if selected_choice_id:
+                try:
+                    selected_choice = q.choices.get(id=selected_choice_id)
+                    selected_choice_text = selected_choice.text
+                except:
+                    selected_choice_text = "Không xác định"
+            
+            is_correct = str(getattr(correct_choice, 'id', None)) == str(selected_choice_id)
             if is_correct:
                 correct += 1
             answer_detail.append({
                 "question": q.text,
-                "your_choice": selected,
-                "correct_choice": str(getattr(correct_choice, 'id', None)),
+                "your_choice": selected_choice_text or "Không trả lời",
+                "correct_choice": correct_choice.text if correct_choice else "Không xác định",
+                "is_correct": is_correct
             })
         score = round((correct / total) * 10, 2) if total > 0 else 0
         # Lưu QuizAttempt
@@ -312,15 +382,29 @@ class StudentQuizAIFeedbackView(APIView):
         total = questions.count()
         for q in questions:
             qid = str(q.id)
-            selected = answers.get(qid)
+            selected_choice_id = answers.get(qid)
             correct_choice = q.choices.filter(is_correct=True).first()
-            is_correct = str(getattr(correct_choice, 'id', None)) == str(selected)
+            
+            # Get selected choice text
+            selected_choice_text = "Không có lựa chọn"
+            if selected_choice_id:
+                try:
+                    selected_choice = q.choices.get(id=int(selected_choice_id))
+                    selected_choice_text = selected_choice.text
+                except (ValueError, Question.DoesNotExist):
+                    selected_choice_text = f"ID: {selected_choice_id}"
+              # Get correct choice text
+            correct_choice_text = "Không có đáp án đúng"
+            if correct_choice:
+                correct_choice_text = correct_choice.text
+            
+            is_correct = str(getattr(correct_choice, 'id', None)) == str(selected_choice_id)
             if is_correct:
                 correct += 1
             answer_detail.append({
                 "question": q.text,
-                "your_choice": selected,
-                "correct_choice": str(getattr(correct_choice, 'id', None)),
+                "your_choice": selected_choice_text,
+                "correct_choice": correct_choice_text,
             })
         quiz_result = {
             "score": attempt.score,

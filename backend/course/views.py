@@ -748,7 +748,6 @@ def teacher_statistics(request):
     for i in range(4, -1, -1):
         month = (now - timedelta(days=now.day-1)).replace(day=1) - timedelta(days=30*i)
         months.append(month.strftime('%m/%Y'))
-    months = months[::-1]
     # Revenue and new students per month
     revenue = []
     new_students = []
